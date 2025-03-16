@@ -18,7 +18,7 @@ import { supabase } from "../../supabase/supabase";
 import { User } from "@supabase/supabase-js";
 
 interface CheckoutModalProps {
-  user: User;
+  user?: User;
   priceId: string;
   planName: string;
   planPrice: string;
@@ -36,6 +36,10 @@ export default function CheckoutModal({
   open,
   onOpenChange,
 }: CheckoutModalProps) {
+  // Ensure user is defined before accessing properties
+  if (!user) {
+    return null;
+  }
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<"details" | "processing" | "success">(
@@ -59,7 +63,7 @@ export default function CheckoutModal({
             return_url: `${window.location.origin}/success`,
           },
           headers: {
-            "X-Customer-Email": user.email || "",
+            "X-Customer-Email": user?.email || "",
           },
         },
       );
@@ -128,7 +132,7 @@ export default function CheckoutModal({
               <Input
                 id="email"
                 type="email"
-                value={user.email || ""}
+                value={user?.email || ""}
                 disabled
               />
             </div>

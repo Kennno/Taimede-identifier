@@ -10,19 +10,18 @@ import {
   Save,
   Share2,
   AlertCircle,
+  Leaf,
+  Droplets,
+  Sun,
+  Sprout,
+  Globe,
 } from "lucide-react";
+import AuthButton from "./auth-button";
+import UpgradeButton from "./upgrade-button";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter } from "./ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
 import { useToast } from "./ui/use-toast";
-import { identifyPlantWithGemini, PlantInfo } from "@/lib/gemini";
+import { identifyPlant, PlantInfo } from "@/lib/plant-ai";
 import HealthStatus from "./health-status";
 import { supabase } from "../../supabase/supabase";
 import {
@@ -31,6 +30,8 @@ import {
   canUserIdentifyMore,
   USAGE_LIMITS,
   getUserTier,
+  trackDeviceUsage,
+  syncDeviceUsageFromDB,
 } from "@/lib/usage-limits";
 
 export default function PlantIdentifier({
@@ -112,6 +113,11 @@ export default function PlantIdentifier({
 
   useEffect(() => {
     const checkUsage = async () => {
+      // First sync device usage from DB to ensure we have the latest count
+      if (!user) {
+        await syncDeviceUsageFromDB();
+      }
+
       const tier = await getUserTier(user?.id, isPremium);
       const count = await getUserUsageCount(user?.id);
       const canIdentifyMore = await canUserIdentifyMore(user?.id, isPremium);
@@ -119,12 +125,17 @@ export default function PlantIdentifier({
       setUserTier(tier);
       setUsageCount(count);
       setCanIdentify(canIdentifyMore);
+
+      // Track device usage for better persistence
+      if (!user) {
+        await trackDeviceUsage(user?.id);
+      }
     };
 
     checkUsage();
   }, [user, isPremium]);
 
-  const identifyPlant = async () => {
+  const handleIdentifyPlant = async () => {
     if (!image) return;
 
     if (!canIdentify) {
@@ -143,7 +154,7 @@ export default function PlantIdentifier({
 
     try {
       console.log("Starting plant identification...");
-      const result = await identifyPlantWithGemini(image);
+      const result = await identifyPlant(image, "en");
       console.log("Identification result:", result);
       setPlantInfo(result);
 
@@ -151,21 +162,31 @@ export default function PlantIdentifier({
       await incrementUsageCount(user?.id);
 
       // Update local state
-      setUsageCount((prev) => prev + 1);
+      const newCount = usageCount + 1;
+      setUsageCount(newCount);
       const newCanIdentify =
-        usageCount + 1 < USAGE_LIMITS[userTier].maxIdentifications;
+        newCount < USAGE_LIMITS[userTier].maxIdentifications;
       setCanIdentify(newCanIdentify);
 
       // Save to recent searches if user is logged in
       if (user) {
         try {
-          await supabase.from("recent_searches").insert({
-            user_id: user.id,
-            image_url: image,
-            plant_name: result.name,
-            scientific_name: result.scientificName,
-            search_data: result,
-          });
+          const { data, error } = await supabase
+            .from("recent_searches")
+            .insert({
+              user_id: user.id,
+              image_url: image,
+              plant_name: result.name,
+              scientific_name: result.scientificName,
+              search_data: result,
+              created_at: new Date().toISOString(),
+            })
+            .select();
+
+          if (error) throw error;
+
+          // You could update local state here if needed
+          console.log("Search saved successfully", data);
         } catch (error) {
           console.error("Error saving search:", error);
         }
@@ -298,6 +319,19 @@ export default function PlantIdentifier({
             <p className="text-xs text-gray-500 mt-2">
               Supported formats: JPG, PNG, WEBP
             </p>
+
+            {/* Usage tracking display for all users */}
+            <div className="mt-4 text-sm text-gray-600">
+              <span
+                className={`${canIdentify ? "text-green-600" : "text-amber-600"} font-medium`}
+              >
+                {usageCount} /{" "}
+                {USAGE_LIMITS[userTier].maxIdentifications === Infinity
+                  ? "∞"
+                  : USAGE_LIMITS[userTier].maxIdentifications}{" "}
+                identifications used
+              </span>
+            </div>
           </div>
         </div>
       ) : (
@@ -322,75 +356,160 @@ export default function PlantIdentifier({
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 text-green-600 animate-spin mb-4" />
-                <p className="text-gray-600">
-                  Identifying your plant with Gemini AI...
-                </p>
+                <p className="text-gray-600">Identifying your plant...</p>
               </div>
             ) : plantInfo ? (
               <div className="space-y-6">
-                <div className="text-center">
-                  <h3 className="text-2xl font-bold text-gray-900">
+                <div className="text-center bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl shadow-sm">
+                  <div className="inline-flex items-center justify-center p-2 bg-green-100 rounded-full mb-3">
+                    <Leaf className="h-6 w-6 text-green-600" />
+                  </div>
+                  <h3 className="text-3xl font-bold text-gray-900 mb-2">
                     {plantInfo.name}
                   </h3>
-                  <p className="text-gray-500 italic">
+                  <p className="text-gray-600 italic text-lg">
                     {plantInfo.scientificName}
                   </p>
                 </div>
 
                 {plantInfo.description && (
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <h4 className="font-medium mb-2">Description</h4>
-                    <p className="text-sm text-gray-700">
+                  <div className="bg-green-50 p-6 rounded-lg border-l-4 border-green-500 shadow-sm">
+                    <h4 className="font-medium text-lg mb-3 text-green-800">
+                      About This Plant
+                    </h4>
+                    <p className="text-gray-700 leading-relaxed">
                       {plantInfo.description}
                     </p>
                   </div>
                 )}
 
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead colSpan={2}>Plant Information</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {plantInfo.origin && (
-                      <TableRow>
-                        <TableCell className="font-medium">Origin</TableCell>
-                        <TableCell>{plantInfo.origin}</TableCell>
-                      </TableRow>
-                    )}
-                    {plantInfo.habitat && (
-                      <TableRow>
-                        <TableCell className="font-medium">
-                          Natural Habitat
-                        </TableCell>
-                        <TableCell>{plantInfo.habitat}</TableCell>
-                      </TableRow>
-                    )}
-                    <TableRow>
-                      <TableCell className="font-medium">Water Needs</TableCell>
-                      <TableCell>{plantInfo.waterNeeds}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Light Needs</TableCell>
-                      <TableCell>{plantInfo.lightNeeds}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Soil Type</TableCell>
-                      <TableCell>{plantInfo.soilType}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">
-                        Growth Habit
-                      </TableCell>
-                      <TableCell>{plantInfo.growthHabit}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Care Level</TableCell>
-                      <TableCell>{plantInfo.careLevel}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-white p-6 rounded-lg shadow-sm border border-green-100">
+                    <h4 className="text-lg font-medium mb-4 text-green-800 flex items-center">
+                      <Droplets className="h-5 w-5 mr-2 text-blue-500" />
+                      Water & Light
+                    </h4>
+                    <div className="space-y-4">
+                      <div className="flex items-start">
+                        <div className="bg-blue-50 p-2 rounded-full mr-3">
+                          <Droplets className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-gray-900">
+                            Water Needs
+                          </h5>
+                          <p className="text-gray-700">
+                            {plantInfo.waterNeeds}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start">
+                        <div className="bg-yellow-50 p-2 rounded-full mr-3">
+                          <Sun className="h-5 w-5 text-yellow-500" />
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-gray-900">
+                            Light Needs
+                          </h5>
+                          <p className="text-gray-700">
+                            {plantInfo.lightNeeds}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-lg shadow-sm border border-green-100">
+                    <h4 className="text-lg font-medium mb-4 text-green-800 flex items-center">
+                      <Sprout className="h-5 w-5 mr-2 text-green-600" />
+                      Growth & Care
+                    </h4>
+                    <div className="space-y-4">
+                      <div className="flex items-start">
+                        <div className="bg-green-50 p-2 rounded-full mr-3">
+                          <Sprout className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-gray-900">
+                            Growth Habit
+                          </h5>
+                          <p className="text-gray-700">
+                            {plantInfo.growthHabit}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start">
+                        <div className="bg-amber-50 p-2 rounded-full mr-3">
+                          <AlertCircle className="h-5 w-5 text-amber-500" />
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-gray-900">
+                            Care Level
+                          </h5>
+                          <p className="text-gray-700">{plantInfo.careLevel}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-lg shadow-sm border border-green-100">
+                    <h4 className="text-lg font-medium mb-4 text-green-800 flex items-center">
+                      <Globe className="h-5 w-5 mr-2 text-indigo-500" />
+                      Origin & Habitat
+                    </h4>
+                    <div className="space-y-4">
+                      {plantInfo.origin && (
+                        <div className="flex items-start">
+                          <div className="bg-indigo-50 p-2 rounded-full mr-3">
+                            <Globe className="h-5 w-5 text-indigo-500" />
+                          </div>
+                          <div>
+                            <h5 className="font-medium text-gray-900">
+                              Origin
+                            </h5>
+                            <p className="text-gray-700">{plantInfo.origin}</p>
+                          </div>
+                        </div>
+                      )}
+                      {plantInfo.habitat && (
+                        <div className="flex items-start">
+                          <div className="bg-teal-50 p-2 rounded-full mr-3">
+                            <Leaf className="h-5 w-5 text-teal-500" />
+                          </div>
+                          <div>
+                            <h5 className="font-medium text-gray-900">
+                              Natural Habitat
+                            </h5>
+                            <p className="text-gray-700">{plantInfo.habitat}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-lg shadow-sm border border-green-100">
+                    <h4 className="text-lg font-medium mb-4 text-green-800 flex items-center">
+                      <Leaf className="h-5 w-5 mr-2 text-green-600" />
+                      Soil & Planting
+                    </h4>
+                    <div className="space-y-4">
+                      <div className="flex items-start">
+                        <div
+                          className="bg-brown-50 p-2 rounded-full mr-3"
+                          style={{ backgroundColor: "#f5f0e6" }}
+                        >
+                          <Leaf className="h-5 w-5 text-amber-700" />
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-gray-900">
+                            Soil Type
+                          </h5>
+                          <p className="text-gray-700">{plantInfo.soilType}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 {plantInfo.healthStatus && (
                   <HealthStatus healthStatus={plantInfo.healthStatus} />
@@ -398,42 +517,41 @@ export default function PlantIdentifier({
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-6">
-                <Button
-                  onClick={identifyPlant}
-                  className="bg-green-600 hover:bg-green-700 mb-4"
-                  disabled={!canIdentify}
-                >
-                  Identify with Gemini AI
-                </Button>
+                <div className="flex gap-3 mb-4">
+                  <Button
+                    onClick={handleIdentifyPlant}
+                    className="bg-green-600 hover:bg-green-700"
+                    disabled={!canIdentify}
+                  >
+                    Identify Plant
+                  </Button>
+                  <Button
+                    onClick={clearImage}
+                    variant="outline"
+                    className="border-green-600 text-green-600 hover:bg-green-50"
+                  >
+                    Try Different Image
+                  </Button>
+                </div>
                 <div className="text-center">
                   <p className="text-sm text-gray-500 mb-2">
-                    Click to analyze your plant image using Google's Gemini AI
+                    Click to analyze your plant image
                   </p>
-                  <div className="flex items-center justify-center gap-2 text-sm">
-                    <span
-                      className={`${canIdentify ? "text-green-600" : "text-amber-600"} font-medium`}
-                    >
-                      {usageCount} /{" "}
-                      {USAGE_LIMITS[userTier].maxIdentifications === Infinity
-                        ? "∞"
-                        : USAGE_LIMITS[userTier].maxIdentifications}{" "}
-                      identifications used
-                    </span>
-                    {!canIdentify && (
-                      <div className="flex items-center text-amber-600">
-                        <AlertCircle className="h-4 w-4 mr-1" />
-                        <span>Limit reached</span>
-                      </div>
-                    )}
-                  </div>
+                  {!canIdentify && (
+                    <div className="flex items-center justify-center text-amber-600 mb-2">
+                      <AlertCircle className="h-4 w-4 mr-1" />
+                      <span>Limit reached</span>
+                    </div>
+                  )}
                   {!user && usageCount > 0 && (
                     <p className="mt-2 text-sm text-gray-600">
-                      <a
-                        href="/sign-up"
-                        className="text-green-600 hover:underline"
+                      <AuthButton
+                        mode="sign-up"
+                        variant="link"
+                        className="text-green-600 hover:underline p-0 h-auto font-normal"
                       >
                         Sign up
-                      </a>{" "}
+                      </AuthButton>{" "}
                       to get more identifications and save your plants!
                     </p>
                   )}
@@ -442,12 +560,13 @@ export default function PlantIdentifier({
                     usageCount >
                       USAGE_LIMITS.registered.maxIdentifications / 2 && (
                       <p className="mt-2 text-sm text-gray-600">
-                        <a
-                          href="/pricing"
-                          className="text-green-600 hover:underline"
+                        <UpgradeButton
+                          userId={user.id}
+                          variant="link"
+                          className="text-green-600 hover:underline p-0 h-auto font-normal"
                         >
                           Upgrade to Premium
-                        </a>{" "}
+                        </UpgradeButton>{" "}
                         for unlimited identifications!
                       </p>
                     )}
@@ -484,6 +603,17 @@ export default function PlantIdentifier({
               >
                 <Share2 className="mr-2 h-4 w-4" />
                 Share
+              </Button>
+              <Button
+                onClick={() => {
+                  clearImage();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                variant="outline"
+                className="border-amber-600 text-amber-600 hover:bg-amber-50"
+              >
+                <Camera className="mr-2 h-4 w-4" />
+                Identify Another Plant
               </Button>
             </CardFooter>
           )}

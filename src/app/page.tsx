@@ -9,11 +9,15 @@ import {
   Sprout,
   Camera,
   Upload,
+  Globe,
 } from "lucide-react";
+import { HomeClientHandler } from "@/components/home-client";
 import PlantIdentifier from "@/components/plant-identifier";
 import PricingPlans from "@/components/pricing-plans";
 import AIAssistant from "@/components/ai-assistant";
-import { cookies } from "next/headers";
+import AboutSection from "@/components/about-section";
+import RecentSearchesShowcase from "@/components/recent-searches-showcase";
+import AuthButton from "@/components/auth-button";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -36,15 +40,25 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
+      <HomeClientHandler />
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-white pt-24 pb-32 sm:pt-32 sm:pb-40">
+      <section className="relative overflow-hidden bg-white pt-16 pb-32 sm:pt-24 sm:pb-40">
         <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-white to-emerald-50 opacity-70" />
+        <div className="absolute -bottom-48 -right-48 w-96 h-96 bg-green-100 rounded-full opacity-50 blur-3xl" />
+        <div className="absolute -top-48 -left-48 w-96 h-96 bg-emerald-100 rounded-full opacity-50 blur-3xl" />
 
         <div className="relative container mx-auto px-4">
-          <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 mb-8 tracking-tight">
+          <div className="flex flex-col items-center text-center mb-12">
+            <div className="inline-flex items-center justify-center p-2 bg-green-100 rounded-full mb-6">
+              <Leaf className="h-6 w-6 text-green-600 mr-2" />
+              <span className="text-green-800 font-medium">
+                AI-Powered Plant Identification
+              </span>
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-8 tracking-tight max-w-4xl">
               Identify{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
                 Plants
@@ -57,16 +71,22 @@ export default async function Home() {
               about its name, care requirements, and more using our AI-powered
               identification tool.
             </p>
+          </div>
 
+          <div className="mt-8">
             <PlantIdentifier user={user} isPremium={isPremium} />
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-gradient-to-b from-white to-green-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
+            <div className="inline-flex items-center justify-center p-2 bg-green-100 rounded-full mb-4">
+              <Sprout className="h-5 w-5 text-green-600 mr-2" />
+              <span className="text-green-800 font-medium">Simple Process</span>
+            </div>
             <h2 className="text-3xl font-bold mb-4">How It Works</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Our plant identification app makes it easy to identify and learn
@@ -77,30 +97,40 @@ export default async function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                icon: <Camera className="w-6 h-6" />,
+                icon: <Camera className="w-8 h-8" />,
                 title: "Take a Photo",
                 description:
                   "Use your device camera or upload an existing image of any plant",
+                color: "bg-blue-50",
+                textColor: "text-blue-600",
               },
               {
-                icon: <Sprout className="w-6 h-6" />,
+                icon: <Sprout className="w-8 h-8" />,
                 title: "Instant Identification",
                 description:
                   "Our AI analyzes the image and identifies the plant species",
+                color: "bg-green-50",
+                textColor: "text-green-600",
               },
               {
-                icon: <Leaf className="w-6 h-6" />,
+                icon: <Leaf className="w-8 h-8" />,
                 title: "Get Detailed Info",
                 description:
                   "Learn about care requirements, growing conditions, and more",
+                color: "bg-emerald-50",
+                textColor: "text-emerald-600",
               },
             ].map((feature, index) => (
               <div
                 key={index}
-                className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                className="p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-all hover:translate-y-[-5px] border border-gray-100"
               >
-                <div className="text-green-600 mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                <div
+                  className={`${feature.color} w-16 h-16 rounded-full flex items-center justify-center mb-6 ${feature.textColor}`}
+                >
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
               </div>
             ))}
@@ -151,9 +181,16 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* About Section */}
+      <AboutSection />
+
       {/* CTA Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gradient-to-r from-green-50 to-emerald-50">
         <div className="container mx-auto px-4 text-center">
+          <div className="inline-flex items-center justify-center p-2 bg-green-100 rounded-full mb-4">
+            <Sprout className="h-5 w-5 text-green-600 mr-2" />
+            <span className="text-green-800 font-medium">Join Us</span>
+          </div>
           <h2 className="text-3xl font-bold mb-4">
             Start Your Plant Journey Today
           </h2>
@@ -161,20 +198,21 @@ export default async function Home() {
             Create an account to save your identified plants and build your
             personal collection.
           </p>
-          <a
-            href="/sign-up"
-            className="inline-flex items-center px-6 py-3 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+          <AuthButton
+            mode="sign-up"
+            className="inline-flex items-center px-6 py-3 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors shadow-md hover:shadow-lg"
           >
             Create Free Account
             <ArrowUpRight className="ml-2 w-4 h-4" />
-          </a>
+          </AuthButton>
         </div>
       </section>
 
+      {/* Pricing Plans Section */}
       <PricingPlans user={user} />
 
       <Footer />
-      {isPremium && <AIAssistant user={user} isPremium={true} />}
+      {user && <AIAssistant user={user} isPremium={isPremium} />}
     </div>
   );
 }

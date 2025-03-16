@@ -25,12 +25,12 @@ interface AuthModalProps {
   redirectUrl?: string;
 }
 
-export default function AuthModal({
+export function AuthModal({
   defaultTab = "sign-in",
   trigger,
   open,
   onOpenChange,
-  redirectUrl = "/dashboard",
+  redirectUrl = "/",
 }: AuthModalProps) {
   const [activeTab, setActiveTab] = useState<"sign-in" | "sign-up">(defaultTab);
   const [email, setEmail] = useState("");

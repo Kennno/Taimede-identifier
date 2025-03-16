@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AIAssistant from "@/components/ai-assistant";
+import { SubscriptionButtonHandler } from "./client-components";
 
 export default async function Dashboard() {
   const supabase = await createClient();
@@ -47,17 +48,18 @@ export default async function Dashboard() {
   return (
     <SubscriptionCheck>
       <DashboardNavbar />
+      <SubscriptionButtonHandler />
       <main className="w-full">
         <div className="container mx-auto px-4 py-8 flex flex-col gap-8">
           {/* Header Section */}
-          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <header className="flex flex-col items-center text-center gap-4 mb-8">
             <div>
               <h1 className="text-3xl font-bold">My Plant Dashboard</h1>
-              <p className="text-gray-600">
+              <p className="text-gray-600 max-w-lg mx-auto mt-2">
                 Manage your identified plants and track their care
               </p>
             </div>
-            <Button className="bg-green-600 hover:bg-green-700" asChild>
+            <Button className="bg-green-600 hover:bg-green-700 mt-2" asChild>
               <a href="/">
                 <Upload className="mr-2 h-4 w-4" />
                 Identify New Plant
@@ -65,8 +67,12 @@ export default async function Dashboard() {
             </Button>
           </header>
 
-          <Tabs defaultValue="collection" className="w-full">
-            <TabsList className="grid w-full md:w-auto grid-cols-4 md:inline-flex">
+          <Tabs defaultValue="account" className="w-full">
+            <TabsList className="flex justify-center mb-8 border-b w-full max-w-2xl mx-auto">
+              <TabsTrigger value="account" className="flex items-center">
+                <UserCircle className="mr-2 h-4 w-4" />
+                Account
+              </TabsTrigger>
               <TabsTrigger value="collection" className="flex items-center">
                 <Leaf className="mr-2 h-4 w-4" />
                 My Collection
@@ -75,26 +81,14 @@ export default async function Dashboard() {
                 <History className="mr-2 h-4 w-4" />
                 Recent Searches
               </TabsTrigger>
-              <TabsTrigger value="account" className="flex items-center">
-                <UserCircle className="mr-2 h-4 w-4" />
-                Account
-              </TabsTrigger>
               <TabsTrigger value="billing" className="flex items-center">
                 <CreditCard className="mr-2 h-4 w-4" />
                 Billing
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="collection" className="mt-6">
-              <PlantCollection user={user} />
-            </TabsContent>
-
-            <TabsContent value="history" className="mt-6">
-              <RecentSearches user={user} />
-            </TabsContent>
-
             <TabsContent value="account" className="mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                 <div className="md:col-span-1">
                   <Card>
                     <CardHeader>
@@ -200,8 +194,16 @@ export default async function Dashboard() {
               </div>
             </TabsContent>
 
+            <TabsContent value="collection" className="mt-6">
+              <PlantCollection user={user} />
+            </TabsContent>
+
+            <TabsContent value="history" className="mt-6">
+              <RecentSearches user={user} />
+            </TabsContent>
+
             <TabsContent value="billing" className="mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                 <div className="md:col-span-1">
                   <Card>
                     <CardHeader>
@@ -234,7 +236,7 @@ export default async function Dashboard() {
                         )}
 
                         <Button className="w-full" asChild>
-                          <a href="/pricing">
+                          <a href="#" data-action="manage-subscription">
                             {subscription
                               ? "Manage Subscription"
                               : "Upgrade to Premium"}
@@ -268,10 +270,8 @@ export default async function Dashboard() {
                           </div>
 
                           <div className="text-center mt-8">
-                            <Button variant="outline" asChild>
-                              <a href="/dashboard/billing-history">
-                                View All Transactions
-                              </a>
+                            <Button variant="outline">
+                              View All Transactions
                             </Button>
                           </div>
                         </div>
@@ -284,7 +284,9 @@ export default async function Dashboard() {
                             className="bg-green-600 hover:bg-green-700"
                             asChild
                           >
-                            <a href="/pricing">View Pricing Plans</a>
+                            <a href="#" data-action="view-pricing-plans">
+                              View Pricing Plans
+                            </a>
                           </Button>
                         </div>
                       )}

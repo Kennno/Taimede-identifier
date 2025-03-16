@@ -1,52 +1,54 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
+export function middleware(request: NextRequest) {
+  const response = NextResponse.next();
+  const url = request.nextUrl.clone();
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return req.cookies.getAll().map(({ name, value }) => ({
-            name,
-            value,
-          }))
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            req.cookies.set(name, value)
-            res.cookies.set(name, value, options)
-          })
-        },
-      },
-    }
-  )
+  // Check for language query parameter
+  const languageParam = url.searchParams.get("language");
+  if (languageParam === "en" || languageParam === "et") {
+    // Set the language cookie based on query parameter
+    response.cookies.set("language", languageParam, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+    });
 
-  // Refresh session if expired - required for Server Components
-  const { data: { session }, error } = await supabase.auth.getSession()
-
-  if (error) {
-    // Auth session error handling without console.error
+    // Remove the language parameter from URL and redirect
+    url.searchParams.delete("language");
+    return NextResponse.redirect(url);
   }
 
-  return res
+  // Check if language cookie exists
+  const languageCookie = request.cookies.get("language");
+
+  // If no language cookie is set, try to detect from Accept-Language header
+  if (!languageCookie) {
+    const acceptLanguage = request.headers.get("accept-language") || "";
+    const userCountry = request.geo?.country || "";
+
+    // Set language based on country or Accept-Language header
+    let language = "en";
+
+    // If user is from Estonia, set language to Estonian
+    if (userCountry === "EE") {
+      language = "et";
+    }
+    // Otherwise check Accept-Language header
+    else if (acceptLanguage.includes("et")) {
+      language = "et";
+    }
+
+    // Set the language cookie
+    response.cookies.set("language", language, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+    });
+  }
+
+  return response;
 }
 
-// Ensure the middleware is only called for relevant paths
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public (public files)
-     * - api/polar/webhook (webhook endpoints)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|public|api/payments/webhook).*)',
-  ],
-}
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};

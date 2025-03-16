@@ -10,7 +10,7 @@ export default function Logo() {
         </div>
       </div>
       <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-600">
-        PlantID
+        RoheAI
       </span>
     </div>
   );

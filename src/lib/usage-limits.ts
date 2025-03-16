@@ -1,4 +1,9 @@
 import { createClient } from "../../supabase/client";
+import {
+  getDeviceId,
+  getUnregisteredIdentificationCount,
+  incrementUnregisteredIdentificationCount,
+} from "./local-storage";
 
 export interface UsageLimit {
   tier: "unregistered" | "registered" | "premium";
@@ -8,11 +13,11 @@ export interface UsageLimit {
 export const USAGE_LIMITS: Record<string, UsageLimit> = {
   unregistered: {
     tier: "unregistered",
-    maxIdentifications: 10,
+    maxIdentifications: 3,
   },
   registered: {
     tier: "registered",
-    maxIdentifications: 20,
+    maxIdentifications: 5,
   },
   premium: {
     tier: "premium",
@@ -23,13 +28,7 @@ export const USAGE_LIMITS: Record<string, UsageLimit> = {
 export async function getUserUsageCount(userId?: string): Promise<number> {
   if (!userId) {
     // For unregistered users, use localStorage to track usage
-    if (typeof window !== "undefined") {
-      const storedCount = localStorage.getItem(
-        "unregisteredIdentificationCount",
-      );
-      return storedCount ? parseInt(storedCount, 10) : 0;
-    }
-    return 0;
+    return getUnregisteredIdentificationCount();
   }
 
   // For registered users, check the database
@@ -50,16 +49,7 @@ export async function getUserUsageCount(userId?: string): Promise<number> {
 export async function incrementUsageCount(userId?: string): Promise<void> {
   if (!userId) {
     // For unregistered users, use localStorage
-    if (typeof window !== "undefined") {
-      const currentCount = localStorage.getItem(
-        "unregisteredIdentificationCount",
-      );
-      const newCount = (currentCount ? parseInt(currentCount, 10) : 0) + 1;
-      localStorage.setItem(
-        "unregisteredIdentificationCount",
-        newCount.toString(),
-      );
-    }
+    incrementUnregisteredIdentificationCount();
     return;
   }
 
@@ -83,4 +73,85 @@ export async function canUserIdentifyMore(
   const usageCount = await getUserUsageCount(userId);
 
   return usageCount < USAGE_LIMITS[tier].maxIdentifications;
+}
+
+// Track device usage in the database for better persistence
+export async function trackDeviceUsage(userId?: string): Promise<void> {
+  if (!userId) {
+    const deviceId = getDeviceId();
+    const supabase = createClient();
+
+    try {
+      // Get the current count from localStorage
+      const localCount = getUnregisteredIdentificationCount();
+
+      // Check if device exists in the database
+      const { data } = await supabase
+        .from("device_usage")
+        .select("*")
+        .eq("device_id", deviceId)
+        .single();
+
+      if (!data) {
+        // Create new device record
+        await supabase.from("device_usage").insert({
+          device_id: deviceId,
+          usage_count: localCount,
+          last_used: new Date().toISOString(),
+        });
+      } else {
+        // Update existing device record with the higher count (local or DB)
+        const updatedCount = Math.max(localCount, data.usage_count);
+
+        // Update the database
+        await supabase
+          .from("device_usage")
+          .update({
+            usage_count: updatedCount,
+            last_used: new Date().toISOString(),
+          })
+          .eq("device_id", deviceId);
+
+        // Also update localStorage to keep them in sync
+        if (updatedCount > localCount) {
+          const now = new Date();
+          const monthKey = `${now.getFullYear()}-${now.getMonth() + 1}`;
+          const key = `unregisteredIdentificationCount_${monthKey}`;
+          localStorage.setItem(key, updatedCount.toString());
+        }
+      }
+    } catch (error) {
+      console.error("Error tracking device usage:", error);
+    }
+  }
+}
+
+// Sync device usage from database to localStorage
+export async function syncDeviceUsageFromDB(): Promise<void> {
+  if (typeof window === "undefined") return;
+
+  try {
+    const deviceId = getDeviceId();
+    const supabase = createClient();
+
+    // Get device usage from database
+    const { data } = await supabase
+      .from("device_usage")
+      .select("*")
+      .eq("device_id", deviceId)
+      .single();
+
+    if (data) {
+      // Update localStorage with the database count if it's higher
+      const localCount = getUnregisteredIdentificationCount();
+      if (data.usage_count > localCount) {
+        const now = new Date();
+        const monthKey = `${now.getFullYear()}-${now.getMonth() + 1}`;
+        const key = `unregisteredIdentificationCount_${monthKey}`;
+        localStorage.setItem(key, data.usage_count.toString());
+      }
+    }
+  } catch (error) {
+    console.error("Error syncing device usage from database:", error);
+  }
 }

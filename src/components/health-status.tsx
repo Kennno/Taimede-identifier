@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, Leaf, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 interface HealthStatusProps {
@@ -9,7 +9,7 @@ interface HealthStatusProps {
   };
 }
 
-export default function HealthStatus({ healthStatus }: HealthStatusProps) {
+export function HealthStatus({ healthStatus }: HealthStatusProps) {
   const { isHealthy, issues, treatments } = healthStatus;
 
   return (
@@ -66,3 +66,6 @@ export default function HealthStatus({ healthStatus }: HealthStatusProps) {
     </Card>
   );
 }
+
+// Also add default export to maintain compatibility with existing imports
+export default HealthStatus;
