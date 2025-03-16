@@ -30,6 +30,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import CheckoutPopup from "./checkout-popup";
+import ResetPasswordDialog from "./reset-password-dialog";
 import Logo from "./logo";
 
 export default function DashboardNavbar() {
@@ -39,6 +40,7 @@ export default function DashboardNavbar() {
   const [usageCount, setUsageCount] = useState(0);
   const [usageLimit, setUsageLimit] = useState(20);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -68,16 +70,27 @@ export default function DashboardNavbar() {
         .eq("status", "active")
         .single();
 
-      setIsPremium(!!subscription);
+      const hasPremium = !!subscription;
+      setIsPremium(hasPremium);
 
-      // Get usage count
-      const { data: searches } = await supabase
-        .from("recent_searches")
-        .select("id")
-        .eq("user_id", currentUser.id);
+      // Get usage count based on subscription type
+      if (hasPremium) {
+        // For premium users, get from premium_usage table
+        const { data: premiumUsage } = await supabase.rpc("get_premium_usage", {
+          user_uuid: currentUser.id,
+        });
+        setUsageCount(premiumUsage || 0);
+      } else {
+        // For regular users, count from recent_searches
+        const { data: searches } = await supabase
+          .from("recent_searches")
+          .select("id")
+          .eq("user_id", currentUser.id);
 
-      setUsageCount(searches?.length || 0);
-      setUsageLimit(!!subscription ? Infinity : 20);
+        setUsageCount(searches?.length || 0);
+      }
+
+      setUsageLimit(hasPremium ? Infinity : 20);
     };
 
     checkSubscription();
@@ -97,7 +110,11 @@ export default function DashboardNavbar() {
         open={isCheckoutOpen}
         onOpenChange={setIsCheckoutOpen}
       />
-      <nav className="w-full border-b border-gray-200 bg-white py-4">
+      <ResetPasswordDialog
+        open={isResetPasswordOpen}
+        onOpenChange={setIsResetPasswordOpen}
+      />
+      <nav className="w-full border-b border-gray-200 bg-white py-4 sticky top-0 z-50">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <Link href="/" prefetch>
@@ -107,8 +124,18 @@ export default function DashboardNavbar() {
           <div className="flex gap-4 items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <UserCircle className="h-6 w-6" />
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 px-3 cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <UserCircle className="h-6 w-6" />
+                    <span className="font-medium">
+                      {user?.user_metadata?.username ||
+                        user?.email ||
+                        "My Account"}
+                    </span>
+                  </div>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -134,10 +161,7 @@ export default function DashboardNavbar() {
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   <span>My Dashboard</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/dashboard")}>
-                  <History className="mr-2 h-4 w-4" />
-                  <span>Recent Searches</span>
-                </DropdownMenuItem>
+
                 {!isPremium && (
                   <DropdownMenuItem onClick={() => setIsCheckoutOpen(true)}>
                     <CreditCard className="mr-2 h-4 w-4" />
@@ -145,9 +169,7 @@ export default function DashboardNavbar() {
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => router.push("/dashboard/reset-password")}
-                >
+                <DropdownMenuItem onClick={() => setIsResetPasswordOpen(true)}>
                   <Lock className="mr-2 h-4 w-4" />
                   <span>Change Password</span>
                 </DropdownMenuItem>

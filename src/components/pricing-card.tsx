@@ -13,6 +13,7 @@ import {
 import { supabase } from "../../supabase/supabase";
 import CheckoutModal from "./checkout-modal";
 import AuthModal from "./auth-modal";
+import { Check as CheckIcon } from "lucide-react";
 
 export default function PricingCard({
   item,
@@ -50,16 +51,34 @@ export default function PricingCard({
               Most Popular
             </div>
           )}
-          <CardTitle className="text-2xl font-bold tracking-tight text-gray-900">
+          <CardTitle className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
             {item.name}
           </CardTitle>
           <CardDescription className="flex items-baseline gap-2 mt-2">
-            <span className="text-4xl font-bold text-gray-900">
+            <span className="text-4xl font-bold text-gray-900 dark:text-gray-100">
               ${item?.amount / 100}
             </span>
-            <span className="text-gray-600">/{item?.interval}</span>
+            <span className="text-gray-600 dark:text-gray-400">
+              /{item?.interval}
+            </span>
           </CardDescription>
         </CardHeader>
+        {item.features && (
+          <div className="px-6 pb-4">
+            <div className="space-y-4 text-sm">
+              {item.features.map((feature, index) => (
+                <div key={index} className="flex items-start">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <CheckIcon className="h-5 w-5 text-green-500 dark:text-green-400" />
+                  </div>
+                  <p className="ml-3 text-gray-700 dark:text-gray-300 dark:text-opacity-90">
+                    {feature}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <CardFooter className="relative">
           <Button
             onClick={handleGetStarted}

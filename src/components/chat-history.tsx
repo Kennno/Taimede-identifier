@@ -220,7 +220,7 @@ export default function ChatHistory({
   if (!isOpen) return null;
 
   return (
-    <Card className="fixed right-20 bottom-20 w-80 sm:w-96 shadow-xl border-green-200 max-h-[500px] flex flex-col z-50">
+    <Card className="absolute right-0 bottom-0 w-80 sm:w-96 shadow-xl border-green-200 max-h-[500px] flex flex-col">
       <div className="py-3 px-4 border-b flex flex-row justify-between items-center bg-white sticky top-0">
         <div className="text-md flex items-center font-semibold">
           <Clock className="h-5 w-5 mr-2 text-green-600" />

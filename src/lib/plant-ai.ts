@@ -7,10 +7,15 @@ export interface PlantInfo {
   origin?: string;
   habitat?: string;
   waterNeeds: string;
+  waterTips?: string;
   lightNeeds: string;
+  lightTips?: string;
   soilType: string;
   growthHabit: string;
+  growthTips?: string;
   careLevel: string;
+  careTips?: string;
+  seasonalCare?: string;
   healthStatus?: {
     isHealthy: boolean;
     issues: string[];

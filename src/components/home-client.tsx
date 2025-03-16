@@ -36,12 +36,34 @@ export function HomeClientHandler() {
       }
     };
 
+    // Check if URL has hash and scroll to that section
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const id = hash.substring(1);
+        const element = document.getElementById(id);
+        if (element) {
+          setTimeout(() => {
+            window.scrollTo({
+              top: element.offsetTop,
+              behavior: "smooth",
+            });
+          }, 100);
+        }
+      }
+    };
+
+    // Initial check for hash in URL
+    handleHashChange();
+
     document.addEventListener("click", handleAnchorClick);
     document.addEventListener("click", handleCreateAccountClick);
+    window.addEventListener("hashchange", handleHashChange);
 
     return () => {
       document.removeEventListener("click", handleAnchorClick);
       document.removeEventListener("click", handleCreateAccountClick);
+      window.removeEventListener("hashchange", handleHashChange);
     };
   }, []);
 

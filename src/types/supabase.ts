@@ -9,6 +9,65 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ai_chats: {
+        Row: {
+          created_at: string | null
+          id: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_messages: {
+        Row: {
+          chat_id: string
+          content: string
+          created_at: string | null
+          id: string
+          image_url: string | null
+          role: string
+        }
+        Insert: {
+          chat_id: string
+          content: string
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          role: string
+        }
+        Update: {
+          chat_id?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "ai_chats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_conversations: {
         Row: {
           created_at: string | null
@@ -39,6 +98,7 @@ export type Database = {
           conversation_id: string
           created_at: string | null
           id: string
+          image_url: string | null
           role: string
           user_id: string
         }
@@ -47,6 +107,7 @@ export type Database = {
           conversation_id: string
           created_at?: string | null
           id?: string
+          image_url?: string | null
           role: string
           user_id: string
         }
@@ -55,6 +116,7 @@ export type Database = {
           conversation_id?: string
           created_at?: string | null
           id?: string
+          image_url?: string | null
           role?: string
           user_id?: string
         }
@@ -92,6 +154,150 @@ export type Database = {
         }
         Relationships: []
       }
+      email_templates: {
+        Row: {
+          body: string
+          created_at: string | null
+          id: string
+          name: string
+          subject: string
+          updated_at: string | null
+          variables: Json | null
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          id?: string
+          name: string
+          subject: string
+          updated_at?: string | null
+          variables?: Json | null
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          id?: string
+          name?: string
+          subject?: string
+          updated_at?: string | null
+          variables?: Json | null
+        }
+        Relationships: []
+      }
+      feature_flags: {
+        Row: {
+          beta_only: boolean
+          created_at: string | null
+          description: string | null
+          enabled: boolean
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          beta_only?: boolean
+          created_at?: string | null
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          beta_only?: boolean
+          created_at?: string | null
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      plant_reports: {
+        Row: {
+          created_at: string | null
+          id: string
+          issue: string
+          plant_id: string | null
+          search_id: string | null
+          status: string
+          suggested_name: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          issue: string
+          plant_id?: string | null
+          search_id?: string | null
+          status?: string
+          suggested_name?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          issue?: string
+          plant_id?: string | null
+          search_id?: string | null
+          status?: string
+          suggested_name?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plant_reports_plant_id_fkey"
+            columns: ["plant_id"]
+            isOneToOne: false
+            referencedRelation: "plants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plant_reports_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "recent_searches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plants: {
+        Row: {
+          care_instructions: Json | null
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          scientific_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          care_instructions?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          scientific_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          care_instructions?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          scientific_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       recent_searches: {
         Row: {
           created_at: string | null
@@ -119,6 +325,66 @@ export type Database = {
           scientific_name?: string
           search_data?: Json | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      roadmap_milestones: {
+        Row: {
+          created_at: string | null
+          description: string
+          icon: string | null
+          id: string
+          sort_order: number
+          status: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          icon?: string | null
+          id?: string
+          sort_order: number
+          status: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          icon?: string | null
+          id?: string
+          sort_order?: number
+          status?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          key: string
+          updated_at: string | null
+          value: Json
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string | null
+          value: Json
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string | null
+          value?: Json
         }
         Relationships: []
       }

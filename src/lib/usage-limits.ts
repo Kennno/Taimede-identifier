@@ -4,6 +4,11 @@ import {
   getUnregisteredIdentificationCount,
   incrementUnregisteredIdentificationCount,
 } from "./local-storage";
+import {
+  getDeviceFingerprint,
+  trackDeviceAcrossAccounts,
+  hasDeviceReachedLimit,
+} from "./device-tracking";
 
 export interface UsageLimit {
   tier: "unregistered" | "registered" | "premium";
@@ -69,6 +74,14 @@ export async function canUserIdentifyMore(
   userId?: string,
   isPremium = false,
 ): Promise<boolean> {
+  // Premium users can always identify more
+  if (isPremium) return true;
+
+  // Check if device has reached limit across accounts
+  const deviceAtLimit = await hasDeviceReachedLimit();
+  if (deviceAtLimit) return false;
+
+  // Check user's own limit
   const tier = await getUserTier(userId, isPremium);
   const usageCount = await getUserUsageCount(userId);
 
@@ -82,6 +95,9 @@ export async function trackDeviceUsage(userId?: string): Promise<void> {
     const supabase = createClient();
 
     try {
+      // Get device fingerprint for cross-account tracking
+      const deviceFingerprint = await getDeviceFingerprint();
+
       // Get the current count from localStorage
       const localCount = getUnregisteredIdentificationCount();
 
@@ -96,6 +112,7 @@ export async function trackDeviceUsage(userId?: string): Promise<void> {
         // Create new device record
         await supabase.from("device_usage").insert({
           device_id: deviceId,
+          device_fingerprint: deviceFingerprint,
           usage_count: localCount,
           last_used: new Date().toISOString(),
         });
@@ -108,6 +125,7 @@ export async function trackDeviceUsage(userId?: string): Promise<void> {
           .from("device_usage")
           .update({
             usage_count: updatedCount,
+            device_fingerprint: deviceFingerprint,
             last_used: new Date().toISOString(),
           })
           .eq("device_id", deviceId);

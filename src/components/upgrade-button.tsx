@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button, ButtonProps } from "./ui/button";
-import CheckoutModal from "./checkout-modal";
+import CheckoutPopup from "./checkout-popup";
 
 interface UpgradeButtonProps extends ButtonProps {
   children: React.ReactNode;
@@ -16,22 +16,22 @@ export default function UpgradeButton({
   userId,
   ...props
 }: UpgradeButtonProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   return (
     <>
       <Button
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => setIsPopupOpen(true)}
         className={className}
         {...props}
       >
         {children}
       </Button>
 
-      <CheckoutModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        userId={userId}
+      <CheckoutPopup
+        user={{ id: userId }}
+        open={isPopupOpen}
+        onOpenChange={setIsPopupOpen}
       />
     </>
   );

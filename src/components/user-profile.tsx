@@ -22,6 +22,7 @@ import { createClient } from "../../supabase/client";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import CheckoutPopup from "./checkout-popup";
+import ResetPasswordDialog from "./reset-password-dialog";
 
 export default function UserProfile() {
   const supabase = createClient();
@@ -30,6 +31,7 @@ export default function UserProfile() {
   const [usageCount, setUsageCount] = useState(0);
   const [usageLimit, setUsageLimit] = useState(5);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -50,24 +52,45 @@ export default function UserProfile() {
           .eq("status", "active")
           .single();
 
-        setIsPremium(!!subscription);
+        const hasPremium = !!subscription;
+        setIsPremium(hasPremium);
 
-        // Get usage count
-        const { data: searches } = await supabase
-          .from("recent_searches")
-          .select("id")
-          .eq("user_id", currentUser.id);
+        // Get usage count based on subscription type
+        if (hasPremium) {
+          // For premium users, get from premium_usage table
+          const { data: premiumUsage } = await supabase.rpc(
+            "get_premium_usage",
+            {
+              user_uuid: currentUser.id,
+            },
+          );
+          setUsageCount(premiumUsage || 0);
+        } else {
+          // For regular users, count from recent_searches
+          const { data: searches } = await supabase
+            .from("recent_searches")
+            .select("id")
+            .eq("user_id", currentUser.id);
 
-        setUsageCount(searches?.length || 0);
+          setUsageCount(searches?.length || 0);
+        }
 
         // Update usage limit based on subscription status
-        setUsageLimit(!!subscription ? Infinity : 5);
+        setUsageLimit(hasPremium ? Infinity : 20);
       } catch (error) {
         console.error("Error checking subscription:", error);
       }
     };
 
     checkSubscription();
+
+    // Listen for custom event to open checkout popup
+    const handleOpenCheckout = () => setIsCheckoutOpen(true);
+    window.addEventListener("openCheckoutPopup", handleOpenCheckout);
+
+    return () => {
+      window.removeEventListener("openCheckoutPopup", handleOpenCheckout);
+    };
   }, []);
 
   const handleSignOut = async () => {
@@ -84,6 +107,10 @@ export default function UserProfile() {
         open={isCheckoutOpen}
         onOpenChange={setIsCheckoutOpen}
       />
+      <ResetPasswordDialog
+        open={isResetPasswordOpen}
+        onOpenChange={setIsResetPasswordOpen}
+      />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
@@ -93,18 +120,15 @@ export default function UserProfile() {
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel>
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium">My Account</p>
+              <p className="text-sm font-medium">
+                {user?.user_metadata?.username || user?.email || "My Account"}
+              </p>
               <div className="flex items-center">
                 <span
                   className={`text-xs ${isPremium ? "text-green-600" : "text-gray-500"}`}
                 >
-                  {isPremium ? "Premium" : "Free"}
+                  {isPremium ? "Premium" : "Free Plan"}
                 </span>
-                {!isPremium && (
-                  <span className="text-xs text-gray-500 ml-2">
-                    ({usageCount}/{usageLimit} identifications)
-                  </span>
-                )}
               </div>
             </div>
           </DropdownMenuLabel>
@@ -113,14 +137,7 @@ export default function UserProfile() {
             <LayoutDashboard className="mr-2 h-4 w-4" />
             <span>Dashboard</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push("/dashboard")}>
-            <Leaf className="mr-2 h-4 w-4" />
-            <span>My Collection</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push("/dashboard")}>
-            <History className="mr-2 h-4 w-4" />
-            <span>Recent Searches</span>
-          </DropdownMenuItem>
+
           {!isPremium && (
             <DropdownMenuItem onClick={() => setIsCheckoutOpen(true)}>
               <CreditCard className="mr-2 h-4 w-4" />
@@ -128,9 +145,7 @@ export default function UserProfile() {
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => router.push("/dashboard/reset-password")}
-          >
+          <DropdownMenuItem onClick={() => setIsResetPasswordOpen(true)}>
             <Lock className="mr-2 h-4 w-4" />
             <span>Change Password</span>
           </DropdownMenuItem>

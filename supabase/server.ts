@@ -22,16 +22,24 @@ export const createClient = async () => {
           }
         },
         setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          } catch (error) {
-            // If cookies() is called in an environment where it's not allowed
-            console.error("Error setting cookies:", error);
+          // Only attempt to set cookies in a server action or route handler context
+          // This prevents the error when cookies are accessed in other contexts
+          if (typeof cookieStore.set === "function") {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) => {
+                cookieStore.set(name, value, options);
+              });
+            } catch (error) {
+              console.error("Error setting cookies:", error);
+            }
+          } else {
+            // In contexts where cookies can't be set, log but don't throw
+            console.log(
+              "Skipping cookie setting - not in a server action or route handler context",
+            );
           }
         },
       },
-    }
+    },
   );
 };

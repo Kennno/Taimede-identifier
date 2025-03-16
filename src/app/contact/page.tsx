@@ -26,32 +26,38 @@ export default async function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-green-950/30 dark:to-gray-900">
       <Navbar user={user} isPremium={isPremium} />
 
       <main className="container mx-auto px-4 py-16">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center justify-center p-2 bg-green-100 rounded-full mb-4">
-              <Mail className="h-5 w-5 text-green-600 mr-2" />
-              <span className="text-green-800 font-medium">Contact Us</span>
+            <div className="inline-flex items-center justify-center p-2 bg-green-100 dark:bg-green-900/50 rounded-full mb-4">
+              <Mail className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
+              <span className="text-green-800 dark:text-green-300 font-medium">
+                Contact Us
+              </span>
             </div>
-            <h1 className="text-4xl font-bold mb-6">Get in Touch</h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <h1 className="text-4xl font-bold mb-6 dark:text-white">
+              Get in Touch
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
               Have questions about RoheAI? We're here to help! Reach out to our
               team using the form below or through our contact information.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <div className="col-span-2 bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-              <h2 className="text-2xl font-bold mb-6">Send Us a Message</h2>
+            <div className="col-span-2 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+              <h2 className="text-2xl font-bold mb-6 dark:text-white">
+                Send Us a Message
+              </h2>
               <form className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label
                       htmlFor="name"
-                      className="block text-sm font-medium text-gray-700"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       Your Name
                     </label>
@@ -60,12 +66,13 @@ export default async function ContactPage() {
                       name="name"
                       placeholder="John Doe"
                       required
+                      className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600"
                     />
                   </div>
                   <div className="space-y-2">
                     <label
                       htmlFor="email"
-                      className="block text-sm font-medium text-gray-700"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       Email Address
                     </label>
@@ -75,6 +82,7 @@ export default async function ContactPage() {
                       type="email"
                       placeholder="john@example.com"
                       required
+                      className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600"
                     />
                   </div>
                 </div>
@@ -82,7 +90,7 @@ export default async function ContactPage() {
                 <div className="space-y-2">
                   <label
                     htmlFor="subject"
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     Subject
                   </label>
@@ -91,13 +99,14 @@ export default async function ContactPage() {
                     name="subject"
                     placeholder="How can we help you?"
                     required
+                    className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <label
                     htmlFor="message"
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     Message
                   </label>
@@ -107,13 +116,13 @@ export default async function ContactPage() {
                     rows={5}
                     placeholder="Your message here..."
                     required
-                    className="resize-none"
+                    className="resize-none bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600"
                   />
                 </div>
 
                 <Button
                   type="submit"
-                  className="bg-green-600 hover:bg-green-700 w-full md:w-auto"
+                  className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 w-full md:w-auto"
                 >
                   <Send className="h-4 w-4 mr-2" />
                   Send Message
@@ -122,36 +131,46 @@ export default async function ContactPage() {
             </div>
 
             <div className="space-y-8">
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h2 className="text-xl font-bold mb-4">Contact Information</h2>
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <h2 className="text-xl font-bold mb-4 dark:text-white">
+                  Contact Information
+                </h2>
                 <div className="space-y-4">
                   <div className="flex items-start">
-                    <div className="bg-green-100 p-2 rounded-full mr-3">
-                      <Mail className="h-5 w-5 text-green-600" />
+                    <div className="bg-green-100 dark:bg-green-900/50 p-2 rounded-full mr-3">
+                      <Mail className="h-5 w-5 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-900">Email</h3>
-                      <p className="text-gray-600">
+                      <h3 className="font-medium text-gray-900 dark:text-white">
+                        Email
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400">
                         support@roheai.example.com
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start">
-                    <div className="bg-green-100 p-2 rounded-full mr-3">
-                      <Phone className="h-5 w-5 text-green-600" />
+                    <div className="bg-green-100 dark:bg-green-900/50 p-2 rounded-full mr-3">
+                      <Phone className="h-5 w-5 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-900">Phone</h3>
-                      <p className="text-gray-600">+1 (555) 123-4567</p>
+                      <h3 className="font-medium text-gray-900 dark:text-white">
+                        Phone
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        +1 (555) 123-4567
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start">
-                    <div className="bg-green-100 p-2 rounded-full mr-3">
-                      <MapPin className="h-5 w-5 text-green-600" />
+                    <div className="bg-green-100 dark:bg-green-900/50 p-2 rounded-full mr-3">
+                      <MapPin className="h-5 w-5 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-900">Office</h3>
-                      <p className="text-gray-600">
+                      <h3 className="font-medium text-gray-900 dark:text-white">
+                        Office
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400">
                         123 Green Street
                         <br />
                         San Francisco, CA 94158
@@ -163,24 +182,36 @@ export default async function ContactPage() {
                 </div>
               </div>
 
-              <div className="bg-green-50 p-6 rounded-xl border border-green-100">
-                <h2 className="text-xl font-bold mb-4">Support Hours</h2>
+              <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-xl border border-green-100 dark:border-green-800">
+                <h2 className="text-xl font-bold mb-4 text-green-800 dark:text-green-300">
+                  Support Hours
+                </h2>
                 <ul className="space-y-2">
                   <li className="flex justify-between">
-                    <span className="text-gray-600">Monday - Friday:</span>
-                    <span className="font-medium">9:00 AM - 6:00 PM EST</span>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Monday - Friday:
+                    </span>
+                    <span className="font-medium dark:text-white">
+                      9:00 AM - 6:00 PM EST
+                    </span>
                   </li>
                   <li className="flex justify-between">
-                    <span className="text-gray-600">Saturday:</span>
-                    <span className="font-medium">10:00 AM - 4:00 PM EST</span>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Saturday:
+                    </span>
+                    <span className="font-medium dark:text-white">
+                      10:00 AM - 4:00 PM EST
+                    </span>
                   </li>
                   <li className="flex justify-between">
-                    <span className="text-gray-600">Sunday:</span>
-                    <span className="font-medium">Closed</span>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Sunday:
+                    </span>
+                    <span className="font-medium dark:text-white">Closed</span>
                   </li>
                 </ul>
-                <div className="mt-4 pt-4 border-t border-green-200">
-                  <p className="text-sm text-gray-600">
+                <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-800">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     Premium users receive priority support with faster response
                     times.
                   </p>
@@ -189,8 +220,8 @@ export default async function ContactPage() {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-16">
-            <h2 className="text-2xl font-bold mb-6 text-center">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-16">
+            <h2 className="text-2xl font-bold mb-6 text-center dark:text-white">
               Frequently Asked Questions
             </h2>
             <div className="grid md:grid-cols-2 gap-6">
@@ -220,10 +251,14 @@ export default async function ContactPage() {
               ].map((faq, index) => (
                 <div
                   key={index}
-                  className="p-4 rounded-lg border border-gray-200"
+                  className="p-4 rounded-lg border border-gray-200 dark:border-gray-700"
                 >
-                  <h3 className="font-bold text-lg mb-2">{faq.question}</h3>
-                  <p className="text-gray-600">{faq.answer}</p>
+                  <h3 className="font-bold text-lg mb-2 dark:text-white">
+                    {faq.question}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    {faq.answer}
+                  </p>
                 </div>
               ))}
             </div>

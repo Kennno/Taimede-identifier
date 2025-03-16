@@ -8,11 +8,10 @@ import {
   History,
   Settings,
   CreditCard,
+  Lock,
 } from "lucide-react";
 import { redirect } from "next/navigation";
 import { SubscriptionCheck } from "@/components/subscription-check";
-import PlantCollection from "@/components/plant-collection";
-import RecentSearches from "@/components/recent-searches";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -73,11 +72,19 @@ export default async function Dashboard() {
                 <UserCircle className="mr-2 h-4 w-4" />
                 Account
               </TabsTrigger>
-              <TabsTrigger value="collection" className="flex items-center">
+              <TabsTrigger
+                value="collection"
+                className="flex items-center"
+                disabled
+              >
                 <Leaf className="mr-2 h-4 w-4" />
                 My Collection
               </TabsTrigger>
-              <TabsTrigger value="history" className="flex items-center">
+              <TabsTrigger
+                value="history"
+                className="flex items-center"
+                disabled
+              >
                 <History className="mr-2 h-4 w-4" />
                 Recent Searches
               </TabsTrigger>
@@ -129,36 +136,6 @@ export default async function Dashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-6">
-                        <div>
-                          <h3 className="text-lg font-medium mb-2">
-                            Email Notifications
-                          </h3>
-                          <p className="text-sm text-gray-500 mb-4">
-                            Manage your email notification preferences
-                          </p>
-
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span>Plant care reminders</span>
-                              <Button variant="outline" size="sm">
-                                Enable
-                              </Button>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span>New features and updates</span>
-                              <Button variant="outline" size="sm">
-                                Enable
-                              </Button>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span>Tips and educational content</span>
-                              <Button variant="outline" size="sm">
-                                Enable
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-
                         <div className="pt-4 border-t">
                           <h3 className="text-lg font-medium mb-2">
                             Connected Accounts
@@ -195,11 +172,33 @@ export default async function Dashboard() {
             </TabsContent>
 
             <TabsContent value="collection" className="mt-6">
-              <PlantCollection user={user} />
+              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <div className="flex items-center justify-center h-64 flex-col space-y-4">
+                  <Lock className="h-12 w-12 text-gray-400 dark:text-gray-500" />
+                  <h3 className="text-xl font-medium text-gray-700 dark:text-gray-300">
+                    Collections Feature Unavailable
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-center max-w-md">
+                    This feature is currently under maintenance. Please check
+                    back later.
+                  </p>
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="history" className="mt-6">
-              <RecentSearches user={user} />
+              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <div className="flex items-center justify-center h-64 flex-col space-y-4">
+                  <Lock className="h-12 w-12 text-gray-400 dark:text-gray-500" />
+                  <h3 className="text-xl font-medium text-gray-700 dark:text-gray-300">
+                    Recent Searches Unavailable
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-center max-w-md">
+                    This feature is currently under maintenance. Please check
+                    back later.
+                  </p>
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="billing" className="mt-6">

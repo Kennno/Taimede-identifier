@@ -8,6 +8,10 @@ import Logo from "./logo";
 import { Button } from "./ui/button";
 import { AuthModal } from "./auth-modal";
 import AuthButton from "./auth-button";
+import ThemeToggle from "./theme-toggle";
+import { LanguageSelector } from "./language-selector";
+import { useLanguage } from "./language-context";
+import { translations } from "@/lib/translations";
 
 export default function Navbar() {
   const supabase = createClient();
@@ -17,6 +21,8 @@ export default function Navbar() {
   const [authModalTab, setAuthModalTab] = useState<"sign-in" | "sign-up">(
     "sign-in",
   );
+  const { language } = useLanguage();
+  const t = translations[language];
 
   useEffect(() => {
     const getUser = async () => {
@@ -60,7 +66,7 @@ export default function Navbar() {
         onOpenChange={setAuthModalOpen}
         defaultTab={authModalTab}
       />
-      <nav className="w-full border-b border-gray-200 bg-white py-4">
+      <nav className="w-full border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 py-4 sticky top-0 z-50 backdrop-blur-sm bg-white/90 dark:bg-gray-900/90">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <Link href="/" prefetch>
@@ -69,46 +75,59 @@ export default function Navbar() {
             <div className="hidden md:flex space-x-6 ml-10">
               <a
                 href="/#pricing"
-                className="text-gray-600 hover:text-green-600 transition-colors"
+                className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const pricingSection = document.getElementById("pricing");
+                  if (pricingSection) {
+                    pricingSection.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
               >
-                Pricing
+                {t.pricing}
+              </a>
+              <a
+                href="/#about"
+                className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const aboutSection = document.getElementById("about");
+                  if (aboutSection) {
+                    aboutSection.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+              >
+                {t.about_us}
               </a>
               <Link
-                href="/about"
-                className="text-gray-600 hover:text-green-600 transition-colors"
+                href="/roadmap"
+                className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
               >
-                About Us
+                {t.roadmap}
               </Link>
               <Link
-                href="/resources/encyclopedia"
-                className="text-gray-600 hover:text-green-600 transition-colors"
+                href="/contact"
+                className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
               >
-                Encyclopedia
-              </Link>
-              <Link
-                href="/resources/care-guides"
-                className="text-gray-600 hover:text-green-600 transition-colors"
-              >
-                Blog
+                {t.contact}
               </Link>
             </div>
           </div>
           <div className="flex gap-4 items-center">
+            <LanguageSelector currentLanguage={language} />
+            <ThemeToggle />
             {!loading && (
               <>
                 {user ? (
-                  <div className="flex items-center gap-3 border border-gray-200 rounded-full py-1 px-2 pr-3 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3 border border-gray-200 rounded-full py-1 px-2 pr-3 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors cursor-pointer">
                     <UserProfile />
-                    <span className="text-sm font-medium hidden sm:inline-block">
-                      My Account
-                    </span>
                   </div>
                 ) : (
                   <div className="flex gap-2">
                     <Button variant="outline" onClick={openSignIn}>
-                      Sign in
+                      {t.sign_in}
                     </Button>
-                    <Button onClick={openSignUp}>Sign up</Button>
+                    <Button onClick={openSignUp}>{t.sign_up}</Button>
                   </div>
                 )}
               </>
