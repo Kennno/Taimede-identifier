@@ -32,138 +32,137 @@ export default async function PrivacyPage() {
             <div className="inline-flex items-center justify-center p-2 bg-green-100 dark:bg-green-900/50 rounded-full mb-4">
               <Shield className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
               <span className="text-green-800 dark:text-green-300 font-medium">
-                Privacy Policy
+                Privaatsuspoliitika
               </span>
             </div>
             <h1 className="text-4xl font-bold mb-6 dark:text-white">
-              Privacy Policy
+              Privaatsuspoliitika
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Last Updated: July 10, 2024
+              Viimati uuendatud: 10. juuli 2024
             </p>
           </div>
 
           <div className="prose prose-lg max-w-none dark:prose-invert">
             <p className="text-gray-700 dark:text-gray-300">
-              At RoheAI, we take your privacy seriously. This Privacy Policy
-              explains how we collect, use, disclose, and safeguard your
-              information when you use our plant identification service.
+              RoheAI-s võtame teie privaatsust tõsiselt. See privaatsuspoliitika
+              selgitab, kuidas me kogume, kasutame, avaldame ja kaitseme teie
+              teavet, kui kasutate meie taimede tuvastamise teenust.
             </p>
 
             <h2 className="text-2xl font-bold mt-8 mb-4 text-gray-900 dark:text-white">
-              Information We Collect
+              Teave, mida me kogume
             </h2>
             <p className="text-gray-700 dark:text-gray-300">
-              We collect information that you provide directly to us when using
-              our service, including:
+              Kogume teavet, mida te meile otse esitate teenuse kasutamisel,
+              sealhulgas:
             </p>
             <ul className="list-disc pl-6 text-gray-700 dark:text-gray-300 space-y-2 my-4">
               <li>
-                <strong className="font-semibold">Account Information:</strong>{" "}
-                When you create an account, we collect your name, email address,
-                and password.
+                <strong className="font-semibold">Konto teave:</strong> Konto
+                loomisel kogume teie nime, e-posti aadressi ja parooli.
               </li>
               <li>
-                <strong className="font-semibold">User Content:</strong> This
-                includes plant images you upload for identification and any
-                information you provide about your plants.
+                <strong className="font-semibold">Kasutaja sisu:</strong> See
+                hõlmab taimede pilte, mille te tuvastamiseks üles laadite, ja
+                kogu teavet, mida te oma taimede kohta esitate.
               </li>
               <li>
-                <strong className="font-semibold">Payment Information:</strong>{" "}
-                If you subscribe to our premium service, we collect payment
-                details, which are processed by our secure payment processor.
+                <strong className="font-semibold">Makseteave:</strong> Kui
+                tellite meie premium-teenuse, kogume makseandmeid, mida töötleb
+                meie turvaline makseteenuse pakkuja.
               </li>
               <li>
-                <strong className="font-semibold">Usage Data:</strong> We
-                collect information about how you interact with our service,
-                including the features you use and the time spent on the
-                platform.
+                <strong className="font-semibold">Kasutusandmed:</strong> Kogume
+                teavet selle kohta, kuidas te meie teenusega suhtlete,
+                sealhulgas kasutatavad funktsioonid ja platvormil veedetud aeg.
               </li>
             </ul>
 
             <h2 className="text-2xl font-bold mt-8 mb-4 text-gray-900 dark:text-white">
-              How We Use Your Information
+              Kuidas me teie teavet kasutame
             </h2>
             <p className="text-gray-700 dark:text-gray-300">
-              We use the information we collect to:
+              Kasutame kogutud teavet selleks, et:
             </p>
             <ul className="list-disc pl-6 text-gray-700 dark:text-gray-300 space-y-2 my-4">
-              <li>Provide, maintain, and improve our services</li>
-              <li>Process and complete transactions</li>
-              <li>Send you technical notices, updates, and support messages</li>
-              <li>Respond to your comments and questions</li>
-              <li>Develop new products and services</li>
-              <li>Monitor and analyze trends and usage</li>
+              <li>Pakkuda, hooldada ja parandada meie teenuseid</li>
+              <li>Töödelda ja lõpetada tehinguid</li>
+              <li>Saata teile tehnilisi teateid, uuendusi ja tugisõnumeid</li>
+              <li>Vastata teie kommentaaridele ja küsimustele</li>
+              <li>Arendada uusi tooteid ja teenuseid</li>
+              <li>Jälgida ja analüüsida trende ja kasutust</li>
               <li>
-                Detect, investigate, and prevent fraudulent transactions and
-                other illegal activities
+                Tuvastada, uurida ja ennetada pettusi ja muid ebaseaduslikke
+                tegevusi
               </li>
-              <li>Personalize your experience</li>
+              <li>Isikupärastada teie kogemust</li>
             </ul>
 
             <h2 className="text-2xl font-bold mt-8 mb-4 text-gray-900 dark:text-white">
-              Sharing Your Information
+              Teie teabe jagamine
             </h2>
             <p className="text-gray-700 dark:text-gray-300">
-              We may share your information with:
+              Võime jagada teie teavet:
             </p>
             <ul className="list-disc pl-6 text-gray-700 dark:text-gray-300 space-y-2 my-4">
               <li>
-                <strong className="font-semibold">Service Providers:</strong>{" "}
-                Third-party vendors who provide services on our behalf, such as
-                payment processing and data analysis.
+                <strong className="font-semibold">Teenusepakkujad:</strong>{" "}
+                Kolmandate osapoolte müüjad, kes pakuvad teenuseid meie nimel,
+                näiteks maksete töötlemine ja andmeanalüüs.
               </li>
               <li>
-                <strong className="font-semibold">Business Partners:</strong>{" "}
-                Companies we partner with to offer integrated services or
-                promotions.
+                <strong className="font-semibold">Äripartnerid:</strong>{" "}
+                Ettevõtted, kellega teeme koostööd integreeritud teenuste või
+                kampaaniate pakkumiseks.
               </li>
               <li>
-                <strong className="font-semibold">Legal Requirements:</strong>{" "}
-                When required by law or to protect our rights and safety.
+                <strong className="font-semibold">Seaduslikud nõuded:</strong>{" "}
+                Kui seadus seda nõuab või meie õiguste ja turvalisuse
+                kaitsmiseks.
               </li>
             </ul>
 
             <h2 className="text-2xl font-bold mt-8 mb-4 text-gray-900 dark:text-white">
-              Data Security
+              Andmete turvalisus
             </h2>
             <p className="text-gray-700 dark:text-gray-300">
-              We implement appropriate technical and organizational measures to
-              protect your personal information. However, no method of
-              transmission over the Internet is 100% secure, and we cannot
-              guarantee absolute security.
+              Rakendame asjakohaseid tehnilisi ja organisatsioonilisi meetmeid
+              teie isikuandmete kaitsmiseks. Siiski ei ole ükski Interneti kaudu
+              edastamise meetod 100% turvaline ja me ei saa garanteerida
+              absoluutset turvalisust.
             </p>
 
             <h2 className="text-2xl font-bold mt-8 mb-4 text-gray-900 dark:text-white">
-              Your Rights
+              Teie õigused
             </h2>
             <p className="text-gray-700 dark:text-gray-300">
-              Depending on your location, you may have certain rights regarding
-              your personal information, including:
+              Sõltuvalt teie asukohast võivad teil olla teatud õigused seoses
+              oma isikuandmetega, sealhulgas:
             </p>
             <ul className="list-disc pl-6 text-gray-700 dark:text-gray-300 space-y-2 my-4">
-              <li>Accessing your personal information</li>
-              <li>Correcting inaccurate information</li>
-              <li>Deleting your information</li>
-              <li>Restricting or objecting to processing</li>
-              <li>Data portability</li>
+              <li>Juurdepääs oma isikuandmetele</li>
+              <li>Ebatäpsete andmete parandamine</li>
+              <li>Oma andmete kustutamine</li>
+              <li>Töötlemise piiramine või sellele vastuväidete esitamine</li>
+              <li>Andmete ülekandmine</li>
             </ul>
 
             <h2 className="text-2xl font-bold mt-8 mb-4 text-gray-900 dark:text-white">
-              Changes to This Policy
+              Muudatused selles poliitikas
             </h2>
             <p className="text-gray-700 dark:text-gray-300">
-              We may update this Privacy Policy from time to time. We will
-              notify you of any changes by posting the new policy on this page
-              and updating the "Last Updated" date.
+              Võime seda privaatsuspoliitikat aeg-ajalt uuendada. Teavitame teid
+              muudatustest, postitades uue poliitika sellele lehele ja uuendades
+              "Viimati uuendatud" kuupäeva.
             </p>
 
             <h2 className="text-2xl font-bold mt-8 mb-4 text-gray-900 dark:text-white">
-              Contact Us
+              Võtke meiega ühendust
             </h2>
             <p className="text-gray-700 dark:text-gray-300">
-              If you have any questions about this Privacy Policy, please
-              contact us at privacy@roheai.com.
+              Kui teil on küsimusi selle privaatsuspoliitika kohta, võtke meiega
+              ühendust aadressil contact@roheai.ee.
             </p>
           </div>
         </div>

@@ -9,7 +9,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "./ui/dialog";
 import { X, Check, Loader2 } from "lucide-react";
 import { supabase } from "../../supabase/supabase";
@@ -46,20 +45,20 @@ export default function CheckoutPopup({
       setPlans([
         {
           id: "price_monthly",
-          name: "Premium Monthly",
+          name: "Premium Igakuiselt",
           amount: 699,
           interval: "month",
         },
         {
           id: "price_yearly",
-          name: "Premium Yearly",
-          amount: 5590,
+          name: "Premium Aastas",
+          amount: 4890,
           interval: "year",
         },
       ]);
     } catch (err: any) {
       console.error("Error fetching plans:", err);
-      setError(err.message || "Failed to load pricing plans");
+      setError(err.message || "Hindade laadimine ebaõnnestus");
     } finally {
       setIsLoading(false);
     }
@@ -72,7 +71,6 @@ export default function CheckoutPopup({
       setIsCheckoutLoading(true);
       setError(null);
 
-      // Get the user's email for the checkout
       const { data: userData } = await supabase.auth.getUser();
       const userEmail = userData.user?.email;
 
@@ -96,106 +94,105 @@ export default function CheckoutPopup({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create checkout session");
+        throw new Error(data.error || "Maksmine ebaõnnestus");
       }
 
-      // Redirect to Stripe checkout
       window.location.href = data.url;
     } catch (error) {
       console.error("Checkout error:", error);
-      setError(
-        error instanceof Error ? error.message : "An unexpected error occurred",
-      );
+      setError(error instanceof Error ? error.message : "Ootamatu viga");
       setIsCheckoutLoading(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl bg-gray-950 text-white border-gray-800">
         <DialogHeader>
           <div className="flex justify-between items-center">
-            <DialogTitle className="text-2xl font-bold">
-              Upgrade to Premium
+            <DialogTitle className="text-2xl font-bold text-white">
+              Ava täielik ligipääs RoheAI-le
             </DialogTitle>
           </div>
-          <DialogDescription>
-            Get unlimited plant identifications and premium features
+          <DialogDescription className="text-gray-400">
+            Saa piiramatu ligipääs taimede tuvastamisele ja personaalsele AI
+            abile
           </DialogDescription>
         </DialogHeader>
 
         <div className="p-6">
           <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">Premium Plan</h3>
-            <p className="text-gray-600">
-              Unlock unlimited plant identifications and premium features
+            <h3 className="text-lg font-medium mb-2 text-white">
+              Premium Plaan
+            </h3>
+            <p className="text-gray-400">
+              Ava piiramatu ligipääs taimede tuvastamisele ja premium
+              funktsioonidele
             </p>
 
             <div className="my-6 flex justify-center">
-              <div className="bg-green-50 p-1 rounded-full flex items-center gap-2 relative max-w-[200px]">
+              <div className="bg-gray-800 p-1 rounded-full flex items-center gap-2 relative max-w-[200px]">
                 <div
-                  className={`absolute inset-y-1 ${isYearly ? "right-1 left-[calc(50%+4px)]" : "left-1 right-[calc(50%+4px)]"} bg-white rounded-full shadow-sm transition-all duration-300 ease-in-out`}
+                  className={`absolute inset-y-1 ${isYearly ? "right-1 left-[calc(50%+4px)]" : "left-1 right-[calc(50%+4px)]"} bg-green-600 rounded-full transition-all duration-300 ease-in-out`}
                 ></div>
                 <button
                   onClick={() => setIsYearly(false)}
-                  className={`px-3 py-1 rounded-full relative z-10 transition-colors text-sm ${!isYearly ? "text-green-800 font-medium" : "text-green-600"}`}
+                  className={`px-3 py-1 rounded-full relative z-10 transition-colors text-sm ${!isYearly ? "text-white font-medium" : "text-gray-400"}`}
                 >
-                  Monthly
+                  Igakuiselt
                 </button>
                 <button
                   onClick={() => setIsYearly(true)}
-                  className={`px-3 py-1 rounded-full relative z-10 transition-colors text-sm ${isYearly ? "text-green-800 font-medium" : "text-green-600"}`}
+                  className={`px-3 py-1 rounded-full relative z-10 transition-colors text-sm ${isYearly ? "text-white font-medium" : "text-gray-400"}`}
                 >
-                  Annually
+                  Aastas
                 </button>
               </div>
             </div>
 
-            <div className="mt-4 p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-100 shadow-sm">
+            <div className="mt-4 p-4 bg-gray-900 rounded-lg border border-gray-800">
               <div className="flex justify-between items-center">
-                <span className="font-medium">Premium Subscription</span>
+                <span className="font-medium text-white">Premium Tellimus</span>
                 <div className="text-right">
                   {isYearly ? (
                     <>
-                      <div className="font-bold text-green-600">
-                        €5.59<span className="text-sm font-normal">/month</span>
+                      <div className="font-bold text-green-400">
+                        €4.89<span className="text-sm font-normal">/kuus</span>
                       </div>
-                      <div className="text-xs text-gray-500">
-                        €67.08 billed annually
-                      </div>
-                      <div className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full inline-block mt-1">
-                        Save 20%
+                      <div className="text-xs text-gray-400">€58.68 aastas</div>
+                      <div className="text-xs bg-green-900 text-green-300 px-2 py-0.5 rounded-full inline-block mt-1">
+                        Säästa 30%
                       </div>
                     </>
                   ) : (
-                    <span className="font-bold text-green-600">
-                      €6.99<span className="text-sm font-normal">/month</span>
+                    <span className="font-bold text-green-400">
+                      €6.99<span className="text-sm font-normal">/kuus</span>
                     </span>
                   )}
                 </div>
               </div>
               <div className="mt-4 space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span>Unlimited plant identifications</span>
+                <div className="flex items-center gap-2 text-sm text-gray-300">
+                  <Check className="h-4 w-4 text-green-400" />
+                  <span>Piiramatu taimede tuvastamine</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span>AI plant care assistant</span>
+                <div className="flex items-center gap-2 text-sm text-gray-300">
+                  <Check className="h-4 w-4 text-green-400" />
+                  <span>AI taimehoolduse assistent</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span>Ad-free experience</span>
+                <div className="flex items-center gap-2 text-sm text-gray-300">
+                  <Check className="h-4 w-4 text-green-400" />
+                  <span>Reklaamivaba kogemus</span>
                 </div>
               </div>
-              <div className="text-sm text-gray-500 mt-4 pt-3 border-t border-green-100">
-                Cancel anytime. {isYearly ? "Annual" : "Monthly"} subscription.
+              <div className="text-sm text-gray-400 mt-4 pt-3 border-t border-gray-800">
+                Tühista igal ajal. {isYearly ? "Aastane" : "Igakuine"} tellimus.
               </div>
             </div>
           </div>
 
           {error && (
-            <div className="mb-6 p-3 bg-red-50 text-red-700 rounded-md text-sm">
+            <div className="mb-6 p-3 bg-red-900/50 text-red-300 rounded-md text-sm border border-red-800">
               {error}
             </div>
           )}
@@ -203,15 +200,15 @@ export default function CheckoutPopup({
           <Button
             onClick={handleCheckout}
             disabled={isCheckoutLoading}
-            className="w-full bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg transition-all"
+            className="w-full bg-green-600 hover:bg-green-700 text-white"
           >
             {isCheckoutLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
+                Töötleb...
               </>
             ) : (
-              `Proceed to ${isYearly ? "Annual" : "Monthly"} Payment`
+              `Jätka ${isYearly ? "aastase" : "igakuise"} maksega`
             )}
           </Button>
         </div>

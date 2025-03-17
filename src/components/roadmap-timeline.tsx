@@ -56,22 +56,22 @@ const statusConfig: Record<
   completed: {
     color: "bg-green-500 dark:bg-green-600",
     icon: CheckCircle,
-    label: "Completed",
+    label: "Valmis",
   },
   "in-progress": {
     color: "bg-blue-500 dark:bg-blue-600",
     icon: Clock,
-    label: "In Progress",
+    label: "Töös",
   },
   planned: {
     color: "bg-amber-500 dark:bg-amber-600",
     icon: CalendarClock,
-    label: "Coming Soon",
+    label: "Planeeritud",
   },
   future: {
     color: "bg-purple-500 dark:bg-purple-600",
     icon: Rocket,
-    label: "Future Plan",
+    label: "Tulevikus",
   },
 };
 
@@ -96,7 +96,7 @@ export function RoadmapTimeline({ milestones }: RoadmapTimelineProps) {
               : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
           )}
         >
-          All Features
+          Kõik funktsioonid
         </button>
         {Object.entries(statusConfig).map(([status, config]) => (
           <button

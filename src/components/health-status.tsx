@@ -21,12 +21,12 @@ export function HealthStatus({ healthStatus }: HealthStatusProps) {
           {isHealthy ? (
             <>
               <CheckCircle className="h-5 w-5 text-green-500" />
-              <span>Plant Health: Healthy</span>
+              <span>Kuvatud taime terviseseisund: Terve</span>
             </>
           ) : (
             <>
               <AlertCircle className="h-5 w-5 text-amber-500" />
-              <span>Plant Health: Issues Detected</span>
+              <span>Kuvatud taime terviseseisund: Probleemid tuvastatud</span>
             </>
           )}
         </CardTitle>
@@ -36,7 +36,7 @@ export function HealthStatus({ healthStatus }: HealthStatusProps) {
           <div className="space-y-4">
             {issues.length > 0 && (
               <div>
-                <h4 className="font-medium mb-2">Issues Detected:</h4>
+                <h4 className="font-medium mb-2">Tuvastatud probleemid:</h4>
                 <ul className="list-disc pl-5 space-y-1 text-sm">
                   {issues.map((issue, index) => (
                     <li key={index}>{issue}</li>
@@ -46,7 +46,7 @@ export function HealthStatus({ healthStatus }: HealthStatusProps) {
             )}
             {treatments.length > 0 && (
               <div>
-                <h4 className="font-medium mb-2">Recommended Treatments:</h4>
+                <h4 className="font-medium mb-2">Soovitatud lahendused:</h4>
                 <ul className="list-disc pl-5 space-y-1 text-sm">
                   {treatments.map((treatment, index) => (
                     <li key={index}>{treatment}</li>
@@ -58,8 +58,8 @@ export function HealthStatus({ healthStatus }: HealthStatusProps) {
         )}
         {isHealthy && (
           <p className="text-sm text-gray-600">
-            No health issues detected. Continue with regular care for optimal
-            growth.
+            Terviseprobleeme ei tuvastatud. Jätka tavalise hooldusega optimaalse
+            kasvu tagamiseks.
           </p>
         )}
       </CardContent>

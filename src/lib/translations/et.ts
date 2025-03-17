@@ -29,10 +29,9 @@ export const et = {
   upgrade: "Täienda",
   sign_up: "Registreeru",
   sign_in: "Logi sisse",
+  select_language: "Vali keel",
 
   // Auth
-  sign_in: "Logi sisse",
-  sign_up: "Registreeru",
   sign_out: "Logi välja",
   forgot_password: "Unustasid parooli?",
   reset_password: "Lähtesta parool",
@@ -45,7 +44,6 @@ export const et = {
   already_have_account: "Sul on juba konto?",
   dont_have_account: "Sul pole veel kontot?",
   continue_with: "Jätka kasutades",
-  or: "või",
   password_reset_sent: "Parooli lähtestamise link on saadetud sinu e-postile.",
   password_reset_success: "Parool on edukalt lähtestatud.",
   password_reset_error: "Parooli lähtestamine ebaõnnestus.",
@@ -139,7 +137,6 @@ export const et = {
   per_month: "kuus",
   per_year: "aastas",
   current_plan: "Praegune pakett",
-  upgrade: "Täienda",
   popular: "Populaarne",
   free_trial: "7-päevane tasuta prooviversioon",
   enhanced_features: "Täiustatud funktsioonid registreeritud kasutajatele",
@@ -161,7 +158,6 @@ export const et = {
   clear_chat: "Tühjenda vestlus",
   thinking: "Mõtleb...",
   ask_about_plant_care: "Küsi taimehoolduse kohta...",
-  upload_photo: "Lae üles foto",
   recent_conversations: "Hiljutised vestlused",
   new_chat: "Uus vestlus",
   no_chat_history: "Vestluste ajalugu puudub",
@@ -279,7 +275,6 @@ export const et = {
   all_features: "Kõik funktsioonid",
   completed: "Valmis",
   in_progress: "Töös",
-  coming_soon: "Tulemas peagi",
   future_plan: "Tulevikuplaan",
   plant_identification: "Taimede tuvastamine",
   plant_identification_desc:
@@ -319,9 +314,6 @@ export const et = {
   how_it_works: "Kuidas see töötab",
   how_it_works_desc:
     "Meie taimede tuvastamise rakendus muudab taimede tuvastamise ja nende kohta õppimise lihtsaks vaid mõne lihtsa sammuga.",
-  take_photo: "Tee foto",
-  take_photo_desc:
-    "Kasuta oma seadme kaamerat või lae üles olemasolev pilt mis tahes taimest",
   instant_identification: "Kohene tuvastamine",
   instant_identification_desc:
     "Meie tehisintellekt analüüsib pilti ja tuvastab taimeliigi",
@@ -353,77 +345,53 @@ export const et = {
   privacy_policy: "Privaatsuspoliitika",
   last_updated: "Viimati uuendatud",
   privacy_intro:
-    "RoheAI-s võtame sinu privaatsust tõsiselt. See privaatsuspoliitika selgitab, kuidas me kogume, kasutame, avalikustame ja kaitseme sinu teavet, kui kasutad meie taimede tuvastamise teenust.",
-  information_collect: "Teave, mida kogume",
-  information_collect_desc:
-    "Kogume teavet, mida sa meile otse annad, kui kasutad meie teenust, sealhulgas:",
-  account_information: "Konto teave",
-  account_information_desc:
-    "Kui lood konto, kogume sinu nime, e-posti aadressi ja parooli.",
-  user_content: "Kasutaja sisu",
-  user_content_desc:
-    "See hõlmab taimede pilte, mida laadid üles tuvastamiseks, ja mis tahes teavet, mida annad oma taimede kohta.",
-  payment_information: "Makseandmed",
-  payment_information_desc:
-    "Kui tellid meie premium teenuse, kogume makseandmeid, mida töötleb meie turvaline makseteenuse pakkuja.",
-  usage_data: "Kasutusandmed",
-  usage_data_desc:
-    "Kogume teavet selle kohta, kuidas sa meie teenusega suhtled, sealhulgas funktsioonid, mida kasutad, ja platvormil veedetud aeg.",
-  how_use_information: "Kuidas me kasutame sinu teavet",
-  how_use_information_desc: "Kasutame kogutud teavet, et:",
-  provide_maintain_improve: "Pakkuda, hooldada ja parandada meie teenuseid",
-  process_complete_transactions: "Töödelda ja lõpetada tehinguid",
-  send_notices: "Saata sulle tehnilisi teateid, uuendusi ja toetusteated",
-  respond_comments: "Vastata sinu kommentaaridele ja küsimustele",
-  develop_new_products: "Arendada uusi tooteid ja teenuseid",
-  monitor_analyze_trends: "Jälgida ja analüüsida trende ja kasutust",
-  detect_prevent_fraud:
-    "Tuvastada, uurida ja ennetada pettuslikke tehinguid ja muid ebaseaduslikke tegevusi",
-  personalize_experience: "Isikupärastada sinu kogemust",
-  sharing_information: "Sinu teabe jagamine",
-  sharing_information_desc: "Võime jagada sinu teavet:",
-  service_providers: "Teenusepakkujad",
-  service_providers_desc:
-    "Kolmanda osapoole müüjad, kes pakuvad teenuseid meie nimel, näiteks maksete töötlemine ja andmeanalüüs.",
-  business_partners: "Äripartnerid",
-  business_partners_desc:
-    "Ettevõtted, kellega teeme koostööd, et pakkuda integreeritud teenuseid või kampaaniaid.",
-  legal_requirements: "Õiguslikud nõuded",
-  legal_requirements_desc:
-    "Kui seadus seda nõuab või meie õiguste ja turvalisuse kaitsmiseks.",
-  data_security: "Andmete turvalisus",
-  data_security_desc:
-    "Rakendame asjakohaseid tehnilisi ja organisatsioonilisi meetmeid sinu isikuandmete kaitsmiseks. Kuid ükski Interneti kaudu edastamise meetod pole 100% turvaline ja me ei saa garanteerida absoluutset turvalisust.",
-  your_rights: "Sinu õigused",
-  your_rights_desc:
-    "Sõltuvalt sinu asukohast võib sul olla teatud õigusi seoses oma isikuandmetega, sealhulgas:",
-  accessing_information: "Juurdepääs oma isikuandmetele",
-  correcting_information: "Ebatäpsete andmete parandamine",
-  deleting_information: "Oma teabe kustutamine",
-  restricting_processing:
-    "Töötlemise piiramine või sellele vastuväidete esitamine",
-  data_portability: "Andmete ülekantavus",
-  changes_policy: "Muudatused selles poliitikas",
-  changes_policy_desc:
-    'Võime seda privaatsuspoliitikat aeg-ajalt uuendada. Teavitame sind kõigist muudatustest, postitades uue poliitika sellele lehele ja uuendades "Viimati uuendatud" kuupäeva.',
-  contact_us: "Võta meiega ühendust",
-  contact_us_desc:
-    "Kui sul on küsimusi selle privaatsuspoliitika kohta, võta meiega ühendust aadressil privacy@roheai.com.",
+    "RoheAI privaatsuspoliitika kirjeldab, kuidas me kogume, kasutame ja kaitseme teie isikuandmeid.",
 
-  // Guest Dashboard
-  guest_dashboard: "Külalise töölaud",
-  sign_up_free: "Registreeru tasuta",
-  guest_message:
-    "Kasutad RoheAI-d külalisena. Sinu tuvastamised salvestatakse lokaalselt sellel seadmel. Registreeru, et pääseda ligi oma tuvastamistele mis tahes seadmest ja avada rohkem funktsioone!",
-
-  // 404 Page
-  page_not_found: "Lehte ei leitud",
-  page_not_found_message:
-    "Lehte, mida otsid, pole olemas või see on teisaldatud.",
-  back_to_home: "Tagasi avalehele",
+  // Plant Identification App
+  upload_plant_photo: "Lae üles taime foto",
+  take_plant_photo: "Tee taime foto",
+  drag_drop_photo: "Lohista ja aseta oma taime foto siia",
+  analyzing_plant: "Analüüsime sinu taime...",
+  identification_results: "Tuvastamise tulemused",
+  plant_name: "Taime nimi",
+  scientific_name: "Teaduslik nimi",
+  care_instructions: "Hooldusjuhised",
+  watering: "Kastmine",
+  light: "Valgus",
+  soil: "Muld",
+  temperature: "Temperatuur",
+  humidity: "Niiskus",
+  fertilizing: "Väetamine",
+  save_to_collection: "Salvesta minu kollektsiooni",
+  try_another: "Proovi teist fotot",
+  identification_error: "Me ei suutnud seda taime tuvastada",
+  try_clearer_photo: "Palun proovi uuesti selgema fotoga",
+  photo_tips: "Foto näpunäited",
+  use_good_lighting: "Kasuta head valgustust",
+  focus_on_leaves: "Keskendu lehtedele ja õitele",
+  avoid_shadows: "Väldi varje",
+  my_plants: "Minu taimed",
+  no_saved_plants: "Veel pole salvestatud taimi",
+  saved_successfully: "Taim on salvestatud sinu kollektsiooni",
+  view_collection: "Vaata minu kollektsiooni",
 
   // Disclaimer
   disclaimer: "Lahtiütlus",
   disclaimer_text:
-    "Taimede tuvastamise tulemused on esitatud ainult juhendina ja ei pruugi alati olla 100% täpsed. Kontrolli alati taimeeksperdiga enne taime tarbimist või selle kasutamist meditsiinilistel eesmärkidel. RoheAI ei vastuta ühegi tegevuse eest, mis on tehtud tuvastamistulemuste põhjal.",
+    "Taimede tuvastamise tulemused on esitatud ainult juhisena ja ei pruugi alati olla 100% täpsed. Enne taime tarbimist või kasutamist meditsiinilistel eesmärkidel kontrolli alati taimeeksperdiga. RoheAI ei vastuta tuvastamise tulemuste põhjal tehtud toimingute eest.",
+
+  // Additional translations from images
+  supported_formats: "Toetatud formaadid: JPG, PNG, WEBP",
+  identifications_used_count: "0 / ∞ tuvastamist kasutatud",
+  tips_for_better_results: "Näpunäited paremaks tuvastamiseks",
+  our_vision: "Meie visioon",
+  help_shape_our_future: "Aita kujundada meie tulevikku",
+  have_a_feature_request: "Kas sul on funktsiooni soov?",
+  wed_love_to_hear:
+    "Meil oleks hea meel kuulda sinu ideid uute funktsioonide või olemasolevate paranduste kohta.",
+  submit_your_ideas: "Esita oma ideed",
+  join_our_community: "Liitu meie kogukonnaga",
+  connect_with_other_plant_enthusiasts:
+    "Ühenda teiste taimeentusiastidega ja jaga oma kogemusi RoheAI-ga.",
+  contact_us_arrow: "Võta meiega ühendust →",
 };

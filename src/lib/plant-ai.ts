@@ -26,7 +26,7 @@ export interface PlantInfo {
 // Function to identify plants from images
 export async function identifyPlant(
   imageBase64: string,
-  language: "en" | "et" = "en",
+  language: "en" | "et" = "et", // Changed default to Estonian
 ): Promise<PlantInfo> {
   try {
     // Call the Gemini API to identify the plant

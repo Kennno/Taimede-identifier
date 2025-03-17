@@ -60,7 +60,7 @@ export default function PlantIdentifier({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { language } = useLanguage();
-  const t = translations[language];
+  const t = translations["et"];
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -154,9 +154,6 @@ export default function PlantIdentifier({
       if (!user) {
         await trackDeviceUsage(user?.id);
       }
-
-      // Track device across accounts
-      // Removed undefined function call
     };
 
     checkUsage();
@@ -171,10 +168,10 @@ export default function PlantIdentifier({
       setShowPricingOnLimit(true);
       // Show toast
       toast({
-        title: "Usage limit reached",
+        title: "Kasutuslimiit ületatud",
         description: user
-          ? "You've reached your monthly identification limit. Please upgrade to Premium for unlimited identifications."
-          : "You've reached the guest identification limit. Please sign up for more identifications.",
+          ? "Olete ületanud oma igakuise tuvastuslimiidi. Palun uuendage Premium-paketile piiramatu arvu tuvastuste jaoks."
+          : "Olete ületanud külalise tuvastuslimiidi. Palun registreeruge rohkemate tuvastuste jaoks.",
         variant: "destructive",
       });
       return;
@@ -184,18 +181,8 @@ export default function PlantIdentifier({
     setPlantInfo(null);
 
     try {
-      // Simulate scanning progress
-      const progressSteps = [
-        "Analyzing image...",
-        "Detecting plant features...",
-        "Comparing with database...",
-        "Generating care information...",
-      ];
-
       // Actual API call
-      console.log("Starting plant identification...");
-      const result = await identifyPlant(image, "en");
-      console.log("Identification result:", result);
+      const result = await identifyPlant(image, "et");
       setPlantInfo(result);
 
       // Increment usage count based on user type
@@ -208,7 +195,6 @@ export default function PlantIdentifier({
               user_uuid: user.id,
             },
           );
-          console.log("Premium usage tracked", trackingData);
         } else {
           // Regular user tracking
           await incrementUsageCount(user.id);
@@ -241,25 +227,22 @@ export default function PlantIdentifier({
             .select();
 
           if (error) throw error;
-
-          // You could update local state here if needed
-          console.log("Search saved successfully", data);
         } catch (error) {
           console.error("Error saving search:", error);
         }
       }
 
       toast({
-        title: "Plant identified",
-        description: `Successfully identified as ${result.name}`,
+        title: "Taim tuvastatud",
+        description: `Edukalt tuvastatud kui ${result.name}`,
         variant: "default",
       });
     } catch (error) {
       console.error("Error identifying plant:", error);
       toast({
-        title: "Identification failed",
+        title: "Tuvastamine ebaõnnestus",
         description:
-          "We couldn't identify this plant. Try taking a clearer photo with good lighting, ensuring the whole plant or distinctive features like leaves and flowers are visible.",
+          "Me ei suutnud seda taime tuvastada. Proovige teha selgem foto hea valgustusega, tagades, et kogu taim või iseloomulikud tunnused nagu lehed ja õied on nähtavad.",
         variant: "destructive",
       });
     } finally {
@@ -361,7 +344,7 @@ export default function PlantIdentifier({
               className="hidden"
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-              Supported formats: JPG, PNG, WEBP
+              {t.supported_formats || "Toetatud formaadid: JPG, PNG, WEBP"}
             </p>
 
             {/* Usage tracking display for all users */}
@@ -487,7 +470,7 @@ export default function PlantIdentifier({
                   <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-green-100 dark:border-green-900/50">
                     <h4 className="text-lg font-medium mb-4 text-green-800 dark:text-green-300 flex items-center">
                       <Droplets className="h-5 w-5 mr-2 text-blue-500 dark:text-blue-400" />
-                      Water & Light
+                      Vesi & Valgus
                     </h4>
                     <div className="space-y-4">
                       <div className="flex items-start">
@@ -503,7 +486,7 @@ export default function PlantIdentifier({
                           </p>
                           {plantInfo.waterTips && (
                             <p className="text-gray-600 dark:text-gray-400 text-sm mt-1 italic">
-                              Tip: {plantInfo.waterTips}
+                              Nõuanne: {plantInfo.waterTips}
                             </p>
                           )}
                         </div>
@@ -521,7 +504,7 @@ export default function PlantIdentifier({
                           </p>
                           {plantInfo.lightTips && (
                             <p className="text-gray-600 dark:text-gray-400 text-sm mt-1 italic">
-                              Tip: {plantInfo.lightTips}
+                              Nõuanne: {plantInfo.lightTips}
                             </p>
                           )}
                         </div>
@@ -532,7 +515,7 @@ export default function PlantIdentifier({
                   <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-green-100 dark:border-green-900/50">
                     <h4 className="text-lg font-medium mb-4 text-green-800 dark:text-green-300 flex items-center">
                       <Sprout className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
-                      Growth & Care
+                      Kasv & Hooldus
                     </h4>
                     <div className="space-y-4">
                       <div className="flex items-start">
@@ -548,7 +531,7 @@ export default function PlantIdentifier({
                           </p>
                           {plantInfo.growthTips && (
                             <p className="text-gray-600 dark:text-gray-400 text-sm mt-1 italic">
-                              Tip: {plantInfo.growthTips}
+                              Nõuanne: {plantInfo.growthTips}
                             </p>
                           )}
                         </div>
@@ -566,7 +549,7 @@ export default function PlantIdentifier({
                           </p>
                           {plantInfo.careTips && (
                             <p className="text-gray-600 dark:text-gray-400 text-sm mt-1 italic">
-                              Tip: {plantInfo.careTips}
+                              Nõuanne: {plantInfo.careTips}
                             </p>
                           )}
                         </div>
@@ -592,7 +575,7 @@ export default function PlantIdentifier({
                   <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-green-100 dark:border-green-900/50">
                     <h4 className="text-lg font-medium mb-4 text-green-800 dark:text-green-300 flex items-center">
                       <Globe className="h-5 w-5 mr-2 text-indigo-500 dark:text-indigo-400" />
-                      Origin & Habitat
+                      Päritolu & Elupaik
                     </h4>
                     <div className="space-y-4">
                       {plantInfo.origin && (
@@ -631,7 +614,7 @@ export default function PlantIdentifier({
                   <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-green-100 dark:border-green-900/50">
                     <h4 className="text-lg font-medium mb-4 text-green-800 dark:text-green-300 flex items-center">
                       <Leaf className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
-                      Soil & Planting
+                      Muld & Istutamine
                     </h4>
                     <div className="space-y-4">
                       <div className="flex items-start">
@@ -678,12 +661,12 @@ export default function PlantIdentifier({
                 </div>
                 <div className="text-center">
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                    Click to analyze your plant image
+                    {t.click_to_analyze || "Klõpsa taime pildi analüüsimiseks"}
                   </p>
                   {!canIdentify && (
                     <div className="flex items-center justify-center text-amber-600 dark:text-amber-400 mb-2">
                       <AlertCircle className="h-4 w-4 mr-1" />
-                      <span>Limit reached</span>
+                      <span>{t.limit_reached || "Limiit on täis"}</span>
                     </div>
                   )}
                   {!user && usageCount > 0 && (
@@ -695,7 +678,8 @@ export default function PlantIdentifier({
                       >
                         {t.sign_up}
                       </AuthButton>{" "}
-                      to get more identifications!
+                      {t.to_get_more_identifications ||
+                        "rohkemate tuvastuste saamiseks!"}
                     </p>
                   )}
                   {user &&
@@ -710,7 +694,8 @@ export default function PlantIdentifier({
                         >
                           {t.upgrade_premium}
                         </UpgradeButton>{" "}
-                        for unlimited identifications!
+                        {t.for_unlimited_identifications ||
+                          "piiramatu arvu tuvastuste jaoks!"}
                       </p>
                     )}
                 </div>
@@ -760,30 +745,21 @@ export default function PlantIdentifier({
                 variant="outline"
                 className="border-green-600 text-green-600 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20"
               >
-                <Share2 className="mr-2 h-4 w-4" />
-                Share
+                <Share2 className="h-4 w-4 mr-2" />{" "}
+                {t.share_result || "Jaga tulemust"}
               </Button>
               <Button
-                onClick={() => {
-                  clearImage();
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
+                onClick={clearImage}
                 variant="outline"
-                className="border-amber-600 text-amber-600 hover:bg-amber-50 dark:border-amber-500 dark:text-amber-400 dark:hover:bg-amber-900/20"
+                className="border-red-500 text-red-500 hover:bg-red-50 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-900/20"
               >
-                <Camera className="mr-2 h-4 w-4" />
-                Identify Another Plant
+                <X className="h-4 w-4 mr-2" />{" "}
+                {t.clear_result || "Puhasta tulemus"}
               </Button>
             </CardFooter>
           )}
         </Card>
       )}
-
-      {/* Disclaimer */}
-      <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-400">
-        <p className="font-medium mb-1">{t.disclaimer}:</p>
-        <p>{t.disclaimer_text}</p>
-      </div>
     </div>
   );
 }

@@ -4,7 +4,11 @@ import { createClient } from "../../../supabase/server";
 import { Milestone, RoadmapTimeline } from "@/components/roadmap-timeline";
 import { RocketIcon, MapIcon } from "lucide-react";
 
+import { redirect } from "next/navigation";
+
 export default async function RoadmapPage() {
+  // Redirect to Estonian route
+  return redirect("/tegevuskava");
   const supabase = await createClient();
   const {
     data: { user },

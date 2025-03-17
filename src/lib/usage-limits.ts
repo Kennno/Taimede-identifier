@@ -32,11 +32,9 @@ export const USAGE_LIMITS: Record<string, UsageLimit> = {
 
 export async function getUserUsageCount(userId?: string): Promise<number> {
   if (!userId) {
-    // For unregistered users, use localStorage to track usage
     return getUnregisteredIdentificationCount();
   }
 
-  // For registered users, check the database
   const supabase = createClient();
   const { data, error } = await supabase
     .from("recent_searches")
@@ -53,12 +51,9 @@ export async function getUserUsageCount(userId?: string): Promise<number> {
 
 export async function incrementUsageCount(userId?: string): Promise<void> {
   if (!userId) {
-    // For unregistered users, use localStorage
     incrementUnregisteredIdentificationCount();
     return;
   }
-
-  // For registered users, the count is automatically incremented when a new record is added to recent_searches
 }
 
 export async function getUserTier(
@@ -74,34 +69,26 @@ export async function canUserIdentifyMore(
   userId?: string,
   isPremium = false,
 ): Promise<boolean> {
-  // Premium users can always identify more
   if (isPremium) return true;
 
-  // Check if device has reached limit across accounts
   const deviceAtLimit = await hasDeviceReachedLimit();
   if (deviceAtLimit) return false;
 
-  // Check user's own limit
   const tier = await getUserTier(userId, isPremium);
   const usageCount = await getUserUsageCount(userId);
 
   return usageCount < USAGE_LIMITS[tier].maxIdentifications;
 }
 
-// Track device usage in the database for better persistence
 export async function trackDeviceUsage(userId?: string): Promise<void> {
   if (!userId) {
     const deviceId = getDeviceId();
     const supabase = createClient();
 
     try {
-      // Get device fingerprint for cross-account tracking
       const deviceFingerprint = await getDeviceFingerprint();
-
-      // Get the current count from localStorage
       const localCount = getUnregisteredIdentificationCount();
 
-      // Check if device exists in the database
       const { data } = await supabase
         .from("device_usage")
         .select("*")
@@ -109,7 +96,6 @@ export async function trackDeviceUsage(userId?: string): Promise<void> {
         .single();
 
       if (!data) {
-        // Create new device record
         await supabase.from("device_usage").insert({
           device_id: deviceId,
           device_fingerprint: deviceFingerprint,
@@ -117,10 +103,8 @@ export async function trackDeviceUsage(userId?: string): Promise<void> {
           last_used: new Date().toISOString(),
         });
       } else {
-        // Update existing device record with the higher count (local or DB)
         const updatedCount = Math.max(localCount, data.usage_count);
 
-        // Update the database
         await supabase
           .from("device_usage")
           .update({
@@ -130,7 +114,6 @@ export async function trackDeviceUsage(userId?: string): Promise<void> {
           })
           .eq("device_id", deviceId);
 
-        // Also update localStorage to keep them in sync
         if (updatedCount > localCount) {
           const now = new Date();
           const monthKey = `${now.getFullYear()}-${now.getMonth() + 1}`;
@@ -144,7 +127,6 @@ export async function trackDeviceUsage(userId?: string): Promise<void> {
   }
 }
 
-// Sync device usage from database to localStorage
 export async function syncDeviceUsageFromDB(): Promise<void> {
   if (typeof window === "undefined") return;
 
@@ -152,7 +134,6 @@ export async function syncDeviceUsageFromDB(): Promise<void> {
     const deviceId = getDeviceId();
     const supabase = createClient();
 
-    // Get device usage from database
     const { data } = await supabase
       .from("device_usage")
       .select("*")
@@ -160,7 +141,6 @@ export async function syncDeviceUsageFromDB(): Promise<void> {
       .single();
 
     if (data) {
-      // Update localStorage with the database count if it's higher
       const localCount = getUnregisteredIdentificationCount();
       if (data.usage_count > localCount) {
         const now = new Date();

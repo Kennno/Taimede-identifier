@@ -130,6 +130,27 @@ export type Database = {
           },
         ]
       }
+      device_tracking: {
+        Row: {
+          created_at: string | null
+          device_id: string
+          id: string
+          is_premium: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          device_id: string
+          id?: string
+          is_premium?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          device_id?: string
+          id?: string
+          is_premium?: boolean | null
+        }
+        Relationships: []
+      }
       device_usage: {
         Row: {
           created_at: string | null
@@ -474,6 +495,30 @@ export type Database = {
           },
         ]
       }
+      usage_tracking: {
+        Row: {
+          created_at: string | null
+          device_id: string
+          id: string
+          is_premium: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          device_id: string
+          id?: string
+          is_premium?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          device_id?: string
+          id?: string
+          is_premium?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           avatar_url: string | null
@@ -562,6 +607,18 @@ export type Database = {
     Functions: {
       delete_old_chats: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      get_premium_usage: {
+        Args: {
+          user_uuid: string
+        }
+        Returns: number
+      }
+      increment_premium_usage: {
+        Args: {
+          user_uuid: string
+        }
         Returns: undefined
       }
     }

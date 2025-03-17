@@ -19,22 +19,154 @@ export interface PlantInfo {
   origin?: string;
   habitat?: string;
   response?: string;
+  waterTips?: string;
+  lightTips?: string;
+  growthTips?: string;
+  careTips?: string;
+  seasonalCare?: string;
 }
+
+// Import the Gemini 2.0 function for premium users
+import { identifyPlantWithGemini2 } from "./gemini-2.0";
+import {
+  getUserSubscriptionTier,
+  SubscriptionTier,
+  trackUsage,
+  checkUsageLimit,
+} from "./subscription-utils";
 
 export async function identifyPlantWithGemini(
   imageBase64: string,
-  language: string = "en",
+  language: string = "et",
   chatQuery: string = "",
+  userId?: string,
+  deviceId?: string,
 ): Promise<PlantInfo> {
   try {
+    // Check if user has reached their usage limit
+    if (!chatQuery && deviceId) {
+      // Only check limits for plant identification, not chat
+      const hasRemainingUsage = await checkUsageLimit(userId, deviceId);
+      if (!hasRemainingUsage) {
+        return {
+          name: "Kasutuslimiit ületatud",
+          scientificName: "Limiit ületatud",
+          description:
+            "Olete ületanud tasuta kasutuslimiidi. Palun registreeruge või uuendage oma tellimust, et jätkata.",
+          waterNeeds: "Pole saadaval",
+          lightNeeds: "Pole saadaval",
+          soilType: "Pole saadaval",
+          growthHabit: "Pole saadaval",
+          careLevel: "Pole saadaval",
+          healthStatus: {
+            isHealthy: false,
+            issues: ["Kasutuslimiit ületatud"],
+            treatments: ["Uuendage oma tellimust, et jätkata"],
+          },
+        };
+      }
+    }
+
+    // Check if user is premium to use Gemini 2.0
+    if (userId) {
+      const tier = await getUserSubscriptionTier(userId);
+      if (tier === SubscriptionTier.PREMIUM) {
+        // Use Gemini 2.0 for premium users
+        const result = await identifyPlantWithGemini2(
+          imageBase64,
+          language,
+          chatQuery,
+        );
+
+        // Track premium usage
+        if (!chatQuery && deviceId) {
+          await trackUsage(userId, deviceId, true);
+        }
+
+        return result;
+      }
+    }
+
+    // For free users, continue with Gemini 1.5
+    // Track usage for free users
+    if (!chatQuery && userId && deviceId) {
+      await trackUsage(userId, deviceId, false);
+    } else if (!chatQuery && !userId && deviceId) {
+      await trackUsage(undefined, deviceId, false);
+    }
+
     // Check if this is a chat query or plant identification
     if (chatQuery) {
-      console.log("Sending chat query to Gemini API...");
+      // Removed console.log
 
-      const promptText =
-        language === "et"
-          ? `Sa oled taimetundmise ekspert ja taimede hoolduse assistent. Vasta järgmisele küsimusele taimede kohta: ${chatQuery}`
-          : `You are a plant care expert and assistant. Please answer the following question about plants: ${chatQuery}`;
+      const promptText = `Sa oled taimetundmise ekspert ja taimede hoolduse assistent. Vasta järgmisele küsimusele taimede kohta: ${chatQuery}\n\nOled sõbralik ja abivalmis vestluskaaslane. Sinu vastused on lühikesed ja konkreetsed, mitte pikad monoloogid. Küsi kasutajalt täpsustavaid küsimusi, et paremini mõista tema taime olukorda. Ära anna kogu infot korraga, vaid jaga seda väiksemate osadena, et vestlus oleks loomulikum. \n\nKui kasutaja küsib konkreetse taime kohta, paku talle esmalt põhiinfot ja küsi, kas ta soovib teada midagi spetsiifilist (nt kastmine, valgus, väetamine). Kasuta vestluses ka küsimusi nagu "Kas sul on veel küsimusi selle taime kohta?" või "Kas soovid teada midagi konkreetset selle taime hoolduse kohta?". \n\nKui vestlus hakkab lõppema, võid pakkuda uusi teemasid, näiteks "Kas sul on veel mõni taim, mille kohta soovid nõu?" või "Kas oled mõelnud uute taimede lisamise peale oma kogusse?". \n\nVÄGA OLULINE: \n1. VASTA ALATI EESTI KEELES, ISEGI KUI KÜSIMUS ON INGLISE KEELES.\n2. JÄTKA VESTLUST LOOMULIKULT, VÕTTES ARVESSE EELNEVAID KÜSIMUSI JA VASTUSEID.\n3. KASUTA PROFESSIONAALSET, KUID KERGESTI MÕISTETAVAT EESTI KEELT.\n4. VÄLDI TÜPOGRAAFILISI VIGU JA EBALOOMULIKKE VÄLJENDEID.\n5. PAKU TÄPSEID JA KASULIKKE NÕUANDEID TAIMEDE HOOLDUSE KOHTA.\n6. KASUTA EELNEVAT VESTLUSE KONTEKSTI, ET PAKKUDA JÄRJEPIDEVAID JA ASJAKOHASEID VASTUSEID.`;
+
+      // Create a history array for chat context if provided in the query
+      const hasContextPrefix = chatQuery.includes(
+        "Eelnevad sõnumid vestluses:",
+      );
+      let contents = [];
+
+      if (hasContextPrefix) {
+        // If there's context, we'll use it to create a more coherent conversation
+        const parts = chatQuery.split(
+          "\n\nVasta kasutaja viimasele küsimusele",
+        );
+        const contextPart = parts[0];
+        const questionPart =
+          parts.length > 1 ? parts[1].replace(/[,:] /g, "") : "";
+
+        // Extract previous messages from context
+        const contextLines = contextPart
+          .replace("Eelnevad sõnumid vestluses:\n", "")
+          .split("\n");
+        const messages = [];
+
+        for (const line of contextLines) {
+          if (line.startsWith("Kasutaja: ")) {
+            messages.push({
+              role: "user",
+              parts: [{ text: line.replace("Kasutaja: ", "") }],
+            });
+          } else if (line.startsWith("Assistent: ")) {
+            messages.push({
+              role: "model",
+              parts: [{ text: line.replace("Assistent: ", "") }],
+            });
+          }
+        }
+
+        // Add the current question
+        if (questionPart) {
+          messages.push({
+            role: "user",
+            parts: [{ text: questionPart }],
+          });
+        }
+
+        // If we have valid messages, use them for context
+        if (messages.length > 0) {
+          contents = messages;
+          // Add system prompt as the first message
+          contents.unshift({
+            role: "user",
+            parts: [{ text: promptText }],
+          });
+        }
+      }
+
+      // If no context was extracted, use the standard approach
+      if (contents.length === 0) {
+        contents = [
+          {
+            parts: [
+              {
+                text: promptText,
+              },
+            ],
+          },
+        ];
+      }
 
       const response = await fetch(`${API_URL}?key=${API_KEY}`, {
         method: "POST",
@@ -42,15 +174,7 @@ export async function identifyPlantWithGemini(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: promptText,
-                },
-              ],
-            },
-          ],
+          contents: contents,
           generationConfig: {
             temperature: 0.7,
             topK: 32,
@@ -103,12 +227,10 @@ export async function identifyPlantWithGemini(
       ? imageBase64.split("base64,")[1]
       : imageBase64;
 
-    console.log("Sending request to identification API...");
+    // Removed console.log
 
     const promptText =
-      language === "et"
-        ? "Sa oled taimetundmise ekspert. Analüüsi seda taime pilti ja anna üksikasjalikku teavet JSON-vormingus. Lisa järgmised väljad: name (tavalise nime), scientificName (ladina keelne nimi), description (üksikasjalikud füüsilised omadused), origin (kust taim pärineb), habitat (looduslik kasvukeskkond), waterNeeds (kastmissagedus ja kogus), lightNeeds (valgusnõuded), soilType (mullaeelistused), growthHabit (kuidas see kasvab), careLevel (raskusaste). Uuri hoolikalt ka taime terviseprobleeme, nagu haigused, kahjurid, toitainete puudused või muud probleemid. Lisa healthStatus objekt järgmisega: isHealthy (boolean), issues (massiiv stringidest, mis kirjeldavad probleeme) ja treatments (massiiv stringidest konkreetsete ravisoovitustega). Kui taim tundub terve, määra isHealthy väärtuseks true ja esita tühjad massiivid probleemide ja ravimeetodite jaoks. Vorminda oma vastus ainult kehtiva JSON-ina, ilma täiendava tekstita."
-        : "You are a plant identification expert. Analyze this plant image and provide detailed information in JSON format. Include the following fields: name (common name), scientificName (Latin name), description (detailed physical characteristics with color, texture, and distinctive features), origin (where the plant originates from with specific regions), habitat (natural growing environment including climate preferences), waterNeeds (precise watering frequency and amount with seasonal adjustments), lightNeeds (detailed light requirements including intensity and duration), soilType (specific soil preferences including pH and composition), growthHabit (detailed growth pattern, rate, and mature size), careLevel (difficulty level with specific maintenance requirements). Also carefully examine the plant for any health issues like diseases, pests, nutrient deficiencies, or other problems. For the healthStatus object, provide: isHealthy (boolean), issues (comprehensive array of strings describing any visible problems with specific symptoms), and treatments (detailed array of strings with specific treatment recommendations including preventative care). If the plant appears healthy, include recommendations to maintain its health. Format your response as valid JSON only, with no additional text.";
+      "Sa oled taimetundmise ekspert. Analüüsi seda taime pilti ja anna üksikasjalikku teavet JSON-vormingus. Lisa järgmised väljad: name (taime tavanimi), scientificName (ladina keelne nimi), description (üksikasjalikud füüsilised omadused), origin (kust taim pärineb), habitat (looduslik kasvukeskkond), waterNeeds (kastmissagedus ja kogus), lightNeeds (valgusnõuded), soilType (mullaeelistused), growthHabit (kuidas see kasvab), careLevel (hoolduse raskusaste). Lisa ka waterTips, lightTips, growthTips ja careTips väljad, mis sisaldavad konkreetseid nõuandeid. \n\nUuri hoolikalt ka taime terviseprobleeme, nagu haigused, kahjurid, toitainete puudused või muud probleemid. Lisa healthStatus objekt järgmisega: isHealthy (boolean), issues (massiiv stringidest, mis kirjeldavad probleeme) ja treatments (massiiv stringidest konkreetsete ravisoovitustega). Kui taim tundub terve, määra isHealthy väärtuseks true ja esita tühjad massiivid probleemide ja ravimeetodite jaoks. Lisa ka seasonalCare väli hooajaliste hooldusnõuannete jaoks. \n\nVorminda oma vastus ainult kehtiva JSON-ina, ilma täiendava tekstita. Ära kasuta JSON-i sees objekte väljadel, mis ei ole healthStatus - kõik väljad peale healthStatus peavad olema stringid. \n\nVÄGA OLULINE: \n1. KÕIK VASTUSED PEAVAD OLEMA KORREKTSES JA PROFESSIONAALSES EESTI KEELES, ISEGI KUI KÜSIMUS ON INGLISE KEELES.\n2. KASUTA SELGET JA TÄPSET KEELT, VÄLDI TÜPOGRAAFILISI VIGU JA EBALOOMULIKKE VÄLJENDEID.\n3. TAIME KIRJELDUSED, HOOLDUSJUHISED JA TERVISESEISUNDI DIAGNOSTIKA PEAVAD OLEMA HÄSTI STRUKTUREERITUD JA SELGED.\n4. KASUTA PROFESSIONAALSET, KUID KERGESTI MÕISTETAVAT EESTI KEELT.\n5. TERVISESEISUNDI KIRJELDUSED PEAVAD OLEMA TÄPSED JA SISALDAMA KONKREETSEID SOOVITUSI.\n6. KÕIK VÄLJAD PEALE healthStatus PEAVAD OLEMA STRINGID, MITTE OBJEKTID.";
 
     const response = await fetch(`${API_URL}?key=${API_KEY}`, {
       method: "POST",
@@ -172,6 +294,17 @@ export async function identifyPlantWithGemini(
         };
       }
 
+      // Ensure all object properties are strings to prevent React rendering issues
+      Object.keys(plantInfo).forEach((key) => {
+        if (
+          typeof plantInfo[key] === "object" &&
+          plantInfo[key] !== null &&
+          key !== "healthStatus"
+        ) {
+          plantInfo[key] = JSON.stringify(plantInfo[key]);
+        }
+      });
+
       return plantInfo as PlantInfo;
     } catch (jsonError) {
       // If direct parsing fails, try to extract JSON from markdown code blocks
@@ -193,53 +326,40 @@ export async function identifyPlantWithGemini(
             };
           }
 
+          // Ensure all object properties are strings to prevent React rendering issues
+          Object.keys(plantInfo).forEach((key) => {
+            if (
+              typeof plantInfo[key] === "object" &&
+              plantInfo[key] !== null &&
+              key !== "healthStatus"
+            ) {
+              plantInfo[key] = JSON.stringify(plantInfo[key]);
+            }
+          });
+
           return plantInfo as PlantInfo;
         } catch (nestedJsonError) {
           throw new Error("Failed to parse JSON from response");
         }
       } else {
         // If no JSON found, create a fallback response
-        if (language === "et") {
-          return {
-            name: "Tundmatu taim",
-            scientificName: "Liik teadmata",
-            description: "Ei suuda määrata esitatud pildi põhjal",
-            origin: "Teadmata",
-            habitat: "Teadmata",
-            waterNeeds: "Ei suuda määrata",
-            lightNeeds: "Ei suuda määrata",
-            soilType: "Ei suuda määrata",
-            growthHabit: "Ei suuda määrata",
-            careLevel: "Ei suuda määrata",
-            healthStatus: {
-              isHealthy: false,
-              issues: ["Ei suuda taime pildilt tuvastada"],
-              treatments: [
-                "Proovi laadida üles selgem pilt parema valgustusega",
-              ],
-            },
-          };
-        } else {
-          return {
-            name: "Unknown Plant",
-            scientificName: "Species unknown",
-            description: "Unable to determine from the provided image",
-            origin: "Unknown",
-            habitat: "Unknown",
-            waterNeeds: "Unable to determine",
-            lightNeeds: "Unable to determine",
-            soilType: "Unable to determine",
-            growthHabit: "Unable to determine",
-            careLevel: "Unable to determine",
-            healthStatus: {
-              isHealthy: false,
-              issues: ["Unable to identify plant from image"],
-              treatments: [
-                "Try uploading a clearer image with better lighting",
-              ],
-            },
-          };
-        }
+        return {
+          name: "Tundmatu taim",
+          scientificName: "Liik teadmata",
+          description: "Ei suuda määrata esitatud pildi põhjal",
+          origin: "Teadmata",
+          habitat: "Teadmata",
+          waterNeeds: "Ei suuda määrata",
+          lightNeeds: "Ei suuda määrata",
+          soilType: "Ei suuda määrata",
+          growthHabit: "Ei suuda määrata",
+          careLevel: "Ei suuda määrata",
+          healthStatus: {
+            isHealthy: false,
+            issues: ["Ei suuda taime pildilt tuvastada"],
+            treatments: ["Proovi laadida üles selgem pilt parema valgustusega"],
+          },
+        };
       }
     }
   } catch (error) {

@@ -48,7 +48,7 @@ export default function UserProfile() {
         const { data: subscription } = await supabase
           .from("subscriptions")
           .select("*")
-          .eq("user_id", currentUser.id)
+          .eq("user_id", currentUser?.id || "")
           .eq("status", "active")
           .single();
 
@@ -95,9 +95,12 @@ export default function UserProfile() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    // Clear local storage for unregistered user tracking
-    localStorage.removeItem("unregisteredIdentificationCount");
+    // Clear all local storage data to reset user state completely
+    localStorage.clear();
+    // Ensure we redirect to home page
     router.push("/");
+    // Force page reload to ensure all state is reset
+    setTimeout(() => window.location.reload(), 100);
   };
 
   return (
@@ -133,30 +136,30 @@ export default function UserProfile() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => router.push("/dashboard")}>
+          <DropdownMenuItem onClick={() => router.push("/toolaud")}>
             <LayoutDashboard className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
+            <span>Töölaud</span>
           </DropdownMenuItem>
 
           {!isPremium && (
             <DropdownMenuItem onClick={() => setIsCheckoutOpen(true)}>
               <CreditCard className="mr-2 h-4 w-4" />
-              <span>Upgrade to Premium</span>
+              <span>Uuenda Premium-paketile</span>
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => setIsResetPasswordOpen(true)}>
             <Lock className="mr-2 h-4 w-4" />
-            <span>Change Password</span>
+            <span>Muuda parooli</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push("/dashboard")}>
+          <DropdownMenuItem onClick={() => router.push("/toolaud")}>
             <Settings className="mr-2 h-4 w-4" />
-            <span>Account Settings</span>
+            <span>Konto seaded</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
-            <span>Sign out</span>
+            <span>Logi välja</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

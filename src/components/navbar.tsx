@@ -9,28 +9,42 @@ import { Button } from "./ui/button";
 import { AuthModal } from "./auth-modal";
 import AuthButton from "./auth-button";
 import ThemeToggle from "./theme-toggle";
-import { LanguageSelector } from "./language-selector";
 import { useLanguage } from "./language-context";
-import { translations } from "@/lib/translations";
 
-export default function Navbar() {
+export default function Navbar({
+  user: propUser,
+  isPremium,
+}: {
+  user?: any;
+  isPremium?: boolean;
+}) {
   const supabase = createClient();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(propUser || null);
+  const [loading, setLoading] = useState(!propUser);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<"sign-in" | "sign-up">(
     "sign-in",
   );
-  const { language } = useLanguage();
-  const t = translations[language];
+  const { t } = useLanguage();
+  // Always use Estonian translations
+  const translations = {
+    prices: "Hinnad",
+    about_us: "Meist",
+    roadmap: "Tegevuskava",
+    contact: "Kontakt",
+    sign_in: "Logi sisse",
+    register: "Registreeru",
+  };
 
   useEffect(() => {
     const getUser = async () => {
-      const {
-        data: { user: currentUser },
-      } = await supabase.auth.getUser();
-      setUser(currentUser);
-      setLoading(false);
+      if (!propUser) {
+        const {
+          data: { user: currentUser },
+        } = await supabase.auth.getUser();
+        setUser(currentUser);
+        setLoading(false);
+      }
     };
 
     getUser();
@@ -47,7 +61,15 @@ export default function Navbar() {
     return () => {
       window.removeEventListener("openAuthModal", handleOpenAuthModal);
     };
-  }, []);
+  }, [propUser]);
+
+  // Update user state when propUser changes
+  useEffect(() => {
+    if (propUser) {
+      setUser(propUser);
+      setLoading(false);
+    }
+  }, [propUser]);
 
   const openSignIn = () => {
     setAuthModalTab("sign-in");
@@ -78,13 +100,17 @@ export default function Navbar() {
                 className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
                 onClick={(e) => {
                   e.preventDefault();
-                  const pricingSection = document.getElementById("pricing");
-                  if (pricingSection) {
-                    pricingSection.scrollIntoView({ behavior: "smooth" });
+                  if (window.location.pathname !== "/") {
+                    window.location.href = "/#pricing";
+                  } else {
+                    const pricingSection = document.getElementById("pricing");
+                    if (pricingSection) {
+                      pricingSection.scrollIntoView({ behavior: "smooth" });
+                    }
                   }
                 }}
               >
-                {t.pricing}
+                {translations.prices}
               </a>
               <a
                 href="/#about"
@@ -97,24 +123,23 @@ export default function Navbar() {
                   }
                 }}
               >
-                {t.about_us}
+                {translations.about_us}
               </a>
               <Link
-                href="/roadmap"
+                href="/tegevuskava"
                 className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
               >
-                {t.roadmap}
+                {translations.roadmap}
               </Link>
               <Link
-                href="/contact"
+                href="/kontakt"
                 className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
               >
-                {t.contact}
+                {translations.contact}
               </Link>
             </div>
           </div>
           <div className="flex gap-4 items-center">
-            <LanguageSelector currentLanguage={language} />
             <ThemeToggle />
             {!loading && (
               <>
@@ -125,9 +150,11 @@ export default function Navbar() {
                 ) : (
                   <div className="flex gap-2">
                     <Button variant="outline" onClick={openSignIn}>
-                      {t.sign_in}
+                      {translations.sign_in}
                     </Button>
-                    <Button onClick={openSignUp}>{t.sign_up}</Button>
+                    <Button onClick={openSignUp}>
+                      {translations.register}
+                    </Button>
                   </div>
                 )}
               </>

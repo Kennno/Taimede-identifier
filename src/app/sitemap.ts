@@ -11,26 +11,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
-      url: `${baseUrl}/about`,
+      url: `${baseUrl}/meist`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/mission`,
+      url: `${baseUrl}/tegevuskava`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/contact`,
+      url: `${baseUrl}/kontakt`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
     },
-
     {
-      url: `${baseUrl}/pricing`,
+      url: `${baseUrl}/hinnad`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,

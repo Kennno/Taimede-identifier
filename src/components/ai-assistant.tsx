@@ -22,6 +22,7 @@ import {
   Upload,
   ArrowLeft,
   Plus,
+  Save,
 } from "lucide-react";
 import { User } from "@supabase/supabase-js";
 import { identifyPlantWithGemini } from "@/lib/gemini";
@@ -44,6 +45,48 @@ interface AIAssistantProps {
   isPremium: boolean;
 }
 
+// Helper to store chat session in localStorage for non-logged in users
+const SESSION_STORAGE_KEY = "plant-ai-chat-session";
+
+const saveSessionToLocalStorage = (
+  messages: Message[],
+  conversationId: string | null,
+) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(
+      SESSION_STORAGE_KEY,
+      JSON.stringify({
+        messages,
+        conversationId,
+        timestamp: new Date().toISOString(),
+      }),
+    );
+  }
+};
+
+const getSessionFromLocalStorage = () => {
+  if (typeof window !== "undefined") {
+    const session = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (session) {
+      try {
+        const parsedSession = JSON.parse(session);
+        // Check if session is less than 24 hours old
+        const timestamp = new Date(parsedSession.timestamp);
+        const now = new Date();
+        const hoursDiff =
+          (now.getTime() - timestamp.getTime()) / (1000 * 60 * 60);
+
+        if (hoursDiff < 24) {
+          return parsedSession;
+        }
+      } catch (e) {
+        console.error("Error parsing chat session from localStorage", e);
+      }
+    }
+  }
+  return null;
+};
+
 export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
   // Only show for premium users
   if (!isPremium) return null;
@@ -57,15 +100,38 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
   const [imageUpload, setImageUpload] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [hasLoadedInitialData, setHasLoadedInitialData] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Initial data loading
+  useEffect(() => {
+    if (!hasLoadedInitialData && isOpen) {
+      if (user) {
+        // For logged in users, load from database
+        loadChatHistory();
+      } else {
+        // For non-logged in users, try to load from localStorage
+        const savedSession = getSessionFromLocalStorage();
+        if (savedSession && savedSession.messages.length > 0) {
+          setMessages(savedSession.messages);
+          setCurrentConversationId(savedSession.conversationId);
+          setIsHistoryOpen(false);
+        } else {
+          // If no saved session, show initial greeting
+          setIsHistoryOpen(false);
+        }
+      }
+      setHasLoadedInitialData(true);
+    }
+  }, [isOpen, user, hasLoadedInitialData]);
+
   // Initial greeting message
   useEffect(() => {
-    if (messages.length === 0 && !isHistoryOpen) {
+    if (messages.length === 0 && !isHistoryOpen && hasLoadedInitialData) {
       const greeting = isPremium
-        ? "Hi there! I'm your plant care assistant. What plant questions can I help with today?"
-        : "Hi there! I'm your plant care assistant. I can answer a few questions for free, or you can upgrade to premium for unlimited plant advice.";
+        ? "Tere! Rõõm sind näha! Mina olen sinu isiklik taimeabi assistent. Milliste taimeküsimustega saan sind täna aidata? 😊"
+        : "Tere! Olen sinu taimede hoolduse assistent. Saan vastata mõnele küsimusele tasuta, või saad uuendada premium-kontole piiramatu taimeabi saamiseks.";
 
       setMessages([
         {
@@ -74,19 +140,51 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
         },
       ]);
     }
-  }, [isPremium, isHistoryOpen, messages.length]);
+  }, [isPremium, isHistoryOpen, messages.length, hasLoadedInitialData]);
+
+  // Save session to localStorage for non-logged in users
+  useEffect(() => {
+    if (!user && messages.length > 0) {
+      saveSessionToLocalStorage(messages, currentConversationId);
+    }
+  }, [messages, currentConversationId, user]);
 
   // Scroll to bottom of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Load chat history when component mounts
+  // Set up realtime subscription for messages
   useEffect(() => {
-    if (user && isOpen) {
-      loadChatHistory();
+    if (user && currentConversationId) {
+      const channel = supabase
+        .channel("chat-messages")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "chat_messages",
+            filter: `conversation_id=eq.${currentConversationId}`,
+          },
+          (payload) => {
+            // Only add the message if it's not already in the messages array
+            const newMessage = payload.new as Message;
+            setMessages((prev) => {
+              if (!prev.some((msg) => msg.id === newMessage.id)) {
+                return [...prev, newMessage];
+              }
+              return prev;
+            });
+          },
+        )
+        .subscribe();
+
+      return () => {
+        supabase.channel("chat-messages").unsubscribe();
+      };
     }
-  }, [user, isOpen]);
+  }, [user, currentConversationId]);
 
   // Handle file input changes
   useEffect(() => {
@@ -117,7 +215,7 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
         .from("chat_conversations")
         .select("*")
         .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+        .order("updated_at", { ascending: false });
 
       if (error) throw error;
 
@@ -143,33 +241,43 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
     if (!user) return;
 
     try {
-      await supabase.from("chat_messages").insert({
-        conversation_id: conversationId,
-        user_id: user.id,
-        role: message.role,
-        content: message.content,
-        image_url: message.image_url,
-      });
+      const { data, error } = await supabase
+        .from("chat_messages")
+        .insert({
+          conversation_id: conversationId,
+          user_id: user.id,
+          role: message.role,
+          content: message.content,
+          image_url: message.image_url,
+        })
+        .select();
+
+      if (error) throw error;
+
+      // Return the saved message with its ID
+      return data?.[0];
     } catch (error) {
       console.error("Error saving message:", error);
+      return null;
     }
   };
 
-  const createNewConversation = async () => {
+  const createNewConversation = async (firstMessage?: Message) => {
     if (!user) return null;
 
     try {
       const conversationId = uuidv4();
       const title =
-        messages.length > 0 && messages[0].role === "user"
-          ? messages[0].content.substring(0, 50) +
-            (messages[0].content.length > 50 ? "..." : "")
-          : "New Conversation";
+        firstMessage && firstMessage.role === "user"
+          ? firstMessage.content.substring(0, 50) +
+            (firstMessage.content.length > 50 ? "..." : "")
+          : "Uus vestlus";
 
       const { error } = await supabase.from("chat_conversations").insert({
         id: conversationId,
         user_id: user.id,
         title: title,
+        last_message: firstMessage?.content || null,
       });
 
       if (error) throw error;
@@ -183,12 +291,6 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
   const handleSendMessage = async () => {
     if ((!input.trim() && !imageUpload) || isLoading) return;
 
-    // Create a new conversation if needed
-    if (!currentConversationId && user) {
-      const newConversationId = await createNewConversation();
-      setCurrentConversationId(newConversationId);
-    }
-
     // Process image if present
     let base64Image = "";
     let imageUrl = null;
@@ -201,79 +303,140 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
           reader.readAsDataURL(imageUpload);
         });
 
-        // Upload image to storage
-        const fileName = `${user?.id || "anonymous"}/${Date.now()}-${imageUpload.name}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("chat_images")
-          .upload(fileName, imageUpload);
+        // Upload image to storage if user is logged in
+        if (user) {
+          const fileName = `${user.id}/${Date.now()}-${imageUpload.name}`;
+          const { data: uploadData, error: uploadError } =
+            await supabase.storage
+              .from("chat_images")
+              .upload(fileName, imageUpload);
 
-        if (uploadError) throw uploadError;
+          if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage
-          .from("chat_images")
-          .getPublicUrl(fileName);
+          const { data: urlData } = supabase.storage
+            .from("chat_images")
+            .getPublicUrl(fileName);
 
-        imageUrl = urlData.publicUrl;
+          imageUrl = urlData.publicUrl;
+        }
       } catch (error) {
         console.error("Error processing image:", error);
       }
     }
 
-    // Add user message
+    // Create user message
     const userMessage: Message = {
       role: "user" as const,
       content:
         input ||
-        "I've uploaded a plant photo. Can you identify it and provide care instructions?",
+        "Ma laadisin üles pildi taimest. Kas sa saaksid seda tuvastada ja anda näpunäiteid selle hooldamisest?",
       image_url: imageUrl,
     };
+
+    // Create a new conversation if needed for logged in users
+    if (!currentConversationId && user) {
+      const newConversationId = await createNewConversation(userMessage);
+      setCurrentConversationId(newConversationId);
+
+      // If we have a conversation ID, save the message
+      if (newConversationId) {
+        const savedMessage = await saveMessageToDatabase(
+          userMessage,
+          newConversationId,
+        );
+        if (savedMessage) {
+          userMessage.id = savedMessage.id;
+          userMessage.created_at = savedMessage.created_at;
+          userMessage.conversation_id = newConversationId;
+        }
+      }
+    } else if (currentConversationId && user) {
+      // Save message to existing conversation
+      const savedMessage = await saveMessageToDatabase(
+        userMessage,
+        currentConversationId,
+      );
+      if (savedMessage) {
+        userMessage.id = savedMessage.id;
+        userMessage.created_at = savedMessage.created_at;
+        userMessage.conversation_id = currentConversationId;
+      }
+    }
+
+    // Add user message to UI
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setImageUpload(null);
     setImagePreview(null);
     setIsLoading(true);
 
-    // Save user message to database if logged in
-    if (user && currentConversationId) {
-      await saveMessageToDatabase(userMessage, currentConversationId);
-    }
-
     try {
+      // Prepare context for the AI
+      let contextPrompt = "";
+
+      // Include previous messages as context (last 10 messages)
+      const contextMessages = messages.slice(-10);
+      if (contextMessages.length > 0) {
+        contextPrompt = "Eelnevad sõnumid vestluses:\n";
+        contextMessages.forEach((msg) => {
+          contextPrompt += `${msg.role === "user" ? "Kasutaja" : "Assistent"}: ${msg.content}\n`;
+        });
+        contextPrompt +=
+          "\nVasta kasutaja viimasele küsimusele, võttes arvesse eelnevat vestlust:\n";
+      }
+
       // Call Gemini API for plant care advice
-      const userQuery = input;
+      const userQuery = contextPrompt + input;
 
       // Use the Gemini API to get a response
       const response = await identifyPlantWithGemini(
         base64Image,
-        "en",
+        "et",
         userQuery,
       );
 
-      // Add assistant response
+      // Create assistant response
       const assistantMessage: Message = {
         role: "assistant",
         content:
           response.response ||
-          "I'm not sure how to answer that. Could you try asking in a different way?",
+          "Ma ei ole kindel kuidas sellele vastata. Kas saaksid küsida teistmoodi?",
       };
-      setMessages((prev) => [...prev, assistantMessage]);
 
       // Save assistant message to database if logged in
       if (user && currentConversationId) {
-        await saveMessageToDatabase(assistantMessage, currentConversationId);
+        const savedMessage = await saveMessageToDatabase(
+          assistantMessage,
+          currentConversationId,
+        );
+        if (savedMessage) {
+          assistantMessage.id = savedMessage.id;
+          assistantMessage.created_at = savedMessage.created_at;
+          assistantMessage.conversation_id = currentConversationId;
+        }
       }
+
+      // Add assistant response to UI
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error("Error processing message:", error);
       const errorMessage =
-        "Sorry, I encountered an error. Please try again later.";
+        "Vabandust, tekkis viga. Palun proovi hiljem uuesti.";
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: errorMessage,
-        },
-      ]);
+      const errorAssistantMessage: Message = {
+        role: "assistant",
+        content: errorMessage,
+      };
+
+      // Save error message to database if logged in
+      if (user && currentConversationId) {
+        await saveMessageToDatabase(
+          errorAssistantMessage,
+          currentConversationId,
+        );
+      }
+
+      setMessages((prev) => [...prev, errorAssistantMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -284,11 +447,16 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
       {
         role: "assistant",
         content: isPremium
-          ? "Hello! I'm your plant care assistant. Ask me anything about your plants, and I'll help you take care of them."
-          : "Hello! I'm your plant care assistant. Upgrade to premium for unlimited access to plant care advice.",
+          ? "Tere! Olen sinu taimede hoolduse assistent. Küsi minult ükskõik mida oma taimede kohta ja aitan sul nende eest hoolitseda. Kuidas saan sind täna aidata?"
+          : "Tere! Olen sinu taimede hoolduse assistent. Uuenda premium-kontole, et saada piiramatu juurdepääs taimede hoolduse nõuannetele.",
       },
     ]);
     setCurrentConversationId(null);
+
+    // Clear local storage session for non-logged in users
+    if (!user && typeof window !== "undefined") {
+      localStorage.removeItem(SESSION_STORAGE_KEY);
+    }
   };
 
   const loadConversation = (conversationMessages: Message[]) => {
@@ -302,9 +470,25 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.size > 5 * 1024 * 1024) {
-        // 5MB limit
-        alert("Please upload an image smaller than 5MB");
+      if (file.size > 10 * 1024 * 1024) {
+        // 10MB limit
+        toast({
+          title: "Viga",
+          description: "Palun lae üles pilt väiksem kui 10MB!",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check file type
+      const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+      if (!validTypes.includes(file.type)) {
+        toast({
+          title: "Viga",
+          description:
+            "Palun lae üles ainult JPG, PNG, GIF või WEBP formaadis pilt!",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -320,7 +504,7 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
       // Focus on input after uploading
       setTimeout(() => {
         const inputElement = document.querySelector(
-          'input[placeholder="Ask about plant care..."]',
+          'input[placeholder="Küsi taimede hoolduse kohta..."]',
         ) as HTMLInputElement;
         if (inputElement) {
           inputElement.focus();
@@ -341,6 +525,32 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
     setMessages([]);
     setCurrentConversationId(null);
     setIsHistoryOpen(false);
+  };
+
+  const saveConversation = async () => {
+    // Only for non-logged in users who want to save their conversation
+    if (user || messages.length === 0) return;
+
+    try {
+      setIsLoading(true);
+
+      // Create a new conversation
+      const conversationId = await createNewConversation(messages[0]);
+      if (!conversationId) throw new Error("Failed to create conversation");
+
+      // Save all messages to the database
+      for (const message of messages) {
+        await saveMessageToDatabase(message, conversationId);
+      }
+
+      setCurrentConversationId(conversationId);
+      alert("Vestlus on salvestatud! Kui soovid seda hiljem näha, logi sisse.");
+    } catch (error) {
+      console.error("Error saving conversation:", error);
+      alert("Vabandust, vestluse salvestamisel tekkis viga.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -365,7 +575,7 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
           <CardHeader className="py-3 px-4 border-b flex flex-row justify-between items-center">
             <CardTitle className="text-md flex items-center">
               <Clock className="h-5 w-5 mr-2 text-green-600" />
-              Recent Conversations
+              Hiljutised vestlused
             </CardTitle>
             <div className="flex items-center gap-1">
               <Button
@@ -375,7 +585,7 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
                 className="text-green-600 hover:text-green-700 hover:bg-green-50"
               >
                 <Plus className="h-4 w-4 mr-1" />
-                New Chat
+                Uus vestlus
               </Button>
               <Button
                 variant="ghost"
@@ -404,9 +614,9 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
           <CardHeader className="py-3 px-4 border-b flex flex-row justify-between items-center">
             <CardTitle className="text-md flex items-center">
               <Bot className="h-6 w-6 mr-2 text-green-600" />
-              Plant Care Assistant{" "}
+              Taimede hoolduse abiline{" "}
               <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
-                AI Chatbot
+                AI Vestlusrobot
               </span>
             </CardTitle>
             <div className="flex items-center gap-1">
@@ -416,9 +626,21 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
                   size="icon"
                   onClick={() => setIsHistoryOpen(true)}
                   className="h-8 w-8 text-gray-500 hover:text-green-600"
-                  title="Chat History"
+                  title="Vestluste ajalugu"
                 >
                   <ArrowLeft className="h-4 w-4" />
+                </Button>
+              )}
+              {!user && messages.length > 1 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={saveConversation}
+                  className="h-8 w-8 text-gray-500 hover:text-green-600"
+                  title="Salvesta vestlus"
+                  disabled={isLoading}
+                >
+                  <Save className="h-4 w-4" />
                 </Button>
               )}
               <Button
@@ -426,7 +648,7 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
                 size="icon"
                 onClick={handleClearChat}
                 className="h-8 w-8 text-gray-500 hover:text-red-500"
-                title="Clear Chat"
+                title="Puhasta vestlus"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -440,14 +662,14 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="flex-grow overflow-y-auto p-4 space-y-4 min-h-[300px]">
+          <CardContent className="flex-grow overflow-y-auto p-4 space-y-4 min-h-[300px] bg-white dark:bg-gray-900">
             {messages.map((message, index) => (
               <div
-                key={index}
+                key={message.id || index}
                 className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-3 ${message.role === "user" ? "bg-green-600 text-white" : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"}`}
+                  className={`max-w-[80%] rounded-lg px-4 py-3 shadow-sm ${message.role === "user" ? "bg-green-600 text-white" : "bg-gray-50 text-gray-800 dark:bg-gray-800 dark:text-gray-200"}`}
                 >
                   {message.image_url && (
                     <div className="mb-2">
@@ -477,7 +699,7 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
               <div className="flex justify-start">
                 <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200 flex items-center">
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Thinking...
+                  Mõtlen...
                 </div>
               </div>
             )}
@@ -502,24 +724,41 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
                 </div>
               )}
               <div className="flex items-center space-x-2">
-                <Input
-                  placeholder="Ask about plant care..."
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                  disabled={isLoading}
-                  className="bg-white dark:bg-gray-800"
-                />
+                <div className="relative flex-1">
+                  <Input
+                    placeholder="Küsi taimede hoolduse kohta..."
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                    disabled={isLoading}
+                    className="bg-white dark:bg-gray-800 pr-10"
+                  />
+                  <label
+                    htmlFor="file-upload"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-500"
+                  >
+                    <Upload className="h-5 w-5" />
+                    <input
+                      id="file-upload"
+                      type="file"
+                      accept="image/jpeg,image/png,image/gif,image/webp"
+                      className="hidden"
+                      ref={fileInputRef}
+                      onChange={handleImageUpload}
+                      capture="environment"
+                    />
+                  </label>
+                </div>
                 <Button
                   size="icon"
                   onClick={handleSendMessage}
                   disabled={(!input.trim() && !imageUpload) || isLoading}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-green-600 hover:bg-green-700 flex-shrink-0"
                 >
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -533,7 +772,7 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
                   htmlFor="file-upload"
                   className="cursor-pointer text-xs text-green-600 hover:text-green-700 flex items-center"
                 >
-                  <Upload className="h-3 w-3 mr-1" /> Upload photo
+                  <Upload className="h-3 w-3 mr-1" /> Lae üles foto
                   <input
                     id="file-upload"
                     type="file"
@@ -543,6 +782,11 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
                     onChange={handleImageUpload}
                   />
                 </label>
+                {!user && (
+                  <p className="text-xs text-gray-500">
+                    Vestlus säilib 24h või kuni brauseri sulgemiseni
+                  </p>
+                )}
               </div>
             </div>
           </CardFooter>

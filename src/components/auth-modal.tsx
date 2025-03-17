@@ -59,7 +59,7 @@ export function AuthModal({
       router.push(redirectUrl);
       router.refresh();
     } catch (error: any) {
-      setError(error.message || "Failed to sign in");
+      setError(error.message || "Sisselogimine ebaõnnestus");
     } finally {
       setIsLoading(false);
     }
@@ -106,10 +106,10 @@ export function AuthModal({
         }
       }
 
-      setSuccess("Account created! Please check your email for verification.");
+      setSuccess("Konto loodud! Palun kontrolli oma e-posti kinnitamiseks.");
       setActiveTab("sign-in");
     } catch (error: any) {
-      setError(error.message || "Failed to create account");
+      setError(error.message || "Konto loomine ebaõnnestus");
     } finally {
       setIsLoading(false);
     }
@@ -121,12 +121,12 @@ export function AuthModal({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">
-            {activeTab === "sign-in" ? "Welcome Back" : "Create Account"}
+            {activeTab === "sign-in" ? "Tere tulemast tagasi" : "Loo konto"}
           </DialogTitle>
           <DialogDescription className="text-center">
             {activeTab === "sign-in"
-              ? "Sign in to your account to continue"
-              : "Join us to identify and track your plants"}
+              ? "Logi sisse oma kontole jätkamiseks"
+              : "Liitu meiega taimede tuvastamiseks ja jälgimiseks"}
           </DialogDescription>
         </DialogHeader>
 
@@ -139,18 +139,18 @@ export function AuthModal({
           className="w-full"
         >
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="sign-in">Sign In</TabsTrigger>
-            <TabsTrigger value="sign-up">Sign Up</TabsTrigger>
+            <TabsTrigger value="sign-in">Logi sisse</TabsTrigger>
+            <TabsTrigger value="sign-up">Registreeru</TabsTrigger>
           </TabsList>
 
           <TabsContent value="sign-in" className="mt-4">
             <form onSubmit={handleSignIn} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">E-post</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="sina@näide.ee"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -158,7 +158,7 @@ export function AuthModal({
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Parool</Label>
                   <Button
                     variant="link"
                     className="p-0 h-auto text-xs"
@@ -167,7 +167,7 @@ export function AuthModal({
                       // Handle forgot password
                     }}
                   >
-                    Forgot password?
+                    Unustasid parooli?
                   </Button>
                 </div>
                 <Input
@@ -194,10 +194,10 @@ export function AuthModal({
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
+                    Sisselogimine...
                   </>
                 ) : (
-                  "Sign In"
+                  "Logi sisse"
                 )}
               </Button>
             </form>
@@ -206,28 +206,28 @@ export function AuthModal({
           <TabsContent value="sign-up" className="mt-4">
             <form onSubmit={handleSignUp} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="fullName">Täisnimi</Label>
                 <Input
                   id="fullName"
-                  placeholder="John Doe"
+                  placeholder="Jaan Tamm"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email-signup">Email</Label>
+                <Label htmlFor="email-signup">E-post</Label>
                 <Input
                   id="email-signup"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="sina@näide.ee"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password-signup">Password</Label>
+                <Label htmlFor="password-signup">Parool</Label>
                 <Input
                   id="password-signup"
                   type="password"
@@ -238,7 +238,7 @@ export function AuthModal({
                   minLength={6}
                 />
                 <p className="text-xs text-gray-500">
-                  Password must be at least 6 characters
+                  Parool peab olema vähemalt 6 tähemärki pikk
                 </p>
               </div>
 
@@ -262,10 +262,10 @@ export function AuthModal({
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account...
+                    Konto loomine...
                   </>
                 ) : (
-                  "Create Account"
+                  "Loo konto"
                 )}
               </Button>
             </form>

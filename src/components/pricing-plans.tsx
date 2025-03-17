@@ -16,20 +16,18 @@ import UpgradeButton from "./upgrade-button";
 
 interface PricingPlansProps {
   user: User | null;
+  isPremium?: boolean;
 }
 
-export default function PricingPlans({ user }: PricingPlansProps) {
+export default function PricingPlans({ user = null }: PricingPlansProps) {
   const plans = [
     {
-      name: "Registered",
+      name: "Registreeritud",
       price: "$0",
-      period: "forever",
-      description: "Enhanced features for registered users",
-      features: [
-        "5 plant identifications per month",
-        "Basic plant identification",
-      ],
-      buttonText: "Current Plan",
+      period: "igavesti",
+      description: "Täiustatud funktsioonid registreeritud kasutajatele",
+      features: ["5 taime tuvastamist kuus", "Põhiline taimede tuvastamine"],
+      buttonText: "Praegune Pakett",
       buttonLink: "/dashboard",
       highlighted: false,
       current: user && !user.app_metadata?.subscription,
@@ -38,22 +36,22 @@ export default function PricingPlans({ user }: PricingPlansProps) {
       name: "Premium",
       price: "€6.99",
       originalPrice: "€9.99",
-      period: "per month",
+      period: "kuus",
       yearlyPrice: "€5.59",
       yearlyTotal: "€67.08",
       yearlySavings: "20%",
-      description: "Advanced features for plant enthusiasts",
-      freeTrial: "7-day free trial",
+      description: "Täiustatud funktsioonid taimeentusiastidele",
+      freeTrial: "7-päevane tasuta prooviversioon",
       features: [
-        "Unlimited plant identifications",
-        "All Registered plan features",
-        "Ad-free experience",
-        "Personalized AI plant care assistant",
-        "Priority support",
-        "Enhanced plant care information",
+        "Piiramatu taimede tuvastamine",
+        "Kõik registreeritud paketi funktsioonid",
+        "Reklaamivaba kogemus",
+        "Personaalne tehisintellektil põhinev taimehoolduse assistent",
+        "Prioriteetne tugi",
+        "Täiustatud taimehoolduse teave",
       ],
 
-      buttonText: "Upgrade",
+      buttonText: "Osta",
       buttonLink: "/pricing",
       highlighted: true,
       current: false,
@@ -68,10 +66,10 @@ export default function PricingPlans({ user }: PricingPlansProps) {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl font-bold mb-4 dark:text-white">
-            Simple, transparent pricing
+            Lihtne, läbipaistev hinnakujundus
           </h2>
           <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Choose the perfect plan for your needs
+            Vali oma vajadustele vastav pakett
           </p>
         </div>
 
@@ -83,7 +81,7 @@ export default function PricingPlans({ user }: PricingPlansProps) {
             >
               {plan.highlighted && (
                 <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 transform translate-x-0 -translate-y-0">
-                  Popular
+                  Populaarne
                 </div>
               )}
 
@@ -143,13 +141,13 @@ export default function PricingPlans({ user }: PricingPlansProps) {
                 </ul>
               </CardContent>
               <CardFooter>
-                {plan.name === "Registered" ? (
+                {plan.name === "Registreeritud" ? (
                   <AuthButton
                     mode="sign-up"
                     className={`w-full ${plan.highlighted ? "bg-primary hover:bg-primary/90" : plan.current ? "bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white" : "bg-gray-800 hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600"}`}
                     disabled={plan.current}
                   >
-                    {plan.current ? "Current Plan" : "Sign Up"}
+                    {plan.current ? "Praegune pakett" : "Registreeru"}
                   </AuthButton>
                 ) : user ? (
                   <UpgradeButton
@@ -163,7 +161,7 @@ export default function PricingPlans({ user }: PricingPlansProps) {
                     mode="sign-up"
                     className={`w-full ${plan.highlighted ? "bg-primary hover:bg-primary/90" : "bg-gray-800 hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600"}`}
                   >
-                    Sign Up First
+                    Registreeru kõigepealt
                   </AuthButton>
                 )}
               </CardFooter>

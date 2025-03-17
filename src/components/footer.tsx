@@ -13,15 +13,15 @@ export default function Footer() {
           {/* Help Column */}
           <div>
             <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-              Help
+              Abi
             </h3>
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/contact"
+                  href="/kontakt"
                   className="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary"
                 >
-                  Contact Support
+                  Kontakt{" "}
                 </Link>
               </li>
               <li>
@@ -36,7 +36,7 @@ export default function Footer() {
                     }
                   }}
                 >
-                  Pricing
+                  Hinnad
                 </Link>
               </li>
               <li>
@@ -44,7 +44,7 @@ export default function Footer() {
                   href="/privacy"
                   className="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary"
                 >
-                  Privacy Policy
+                  Privaatsuspoliitika
                 </Link>
               </li>
             </ul>
@@ -53,7 +53,7 @@ export default function Footer() {
           {/* Company Column */}
           <div>
             <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-              Company
+              Ettevõte
             </h3>
             <ul className="space-y-2">
               <li>
@@ -68,7 +68,7 @@ export default function Footer() {
                     }
                   }}
                 >
-                  About Us
+                  Meist
                 </a>
               </li>
               <li>
@@ -76,64 +76,7 @@ export default function Footer() {
                   href="/mission"
                   className="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary"
                 >
-                  Our Mission
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/team"
-                  className="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary"
-                >
-                  Our Team
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary"
-                >
-                  Contact Us
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Legal Column */}
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-              Legal
-            </h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/privacy"
-                  className="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary"
-                >
-                  Privacy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/terms"
-                  className="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary"
-                >
-                  Terms
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/security"
-                  className="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary"
-                >
-                  Security
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/cookies"
-                  className="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary"
-                >
-                  Cookies
+                  Missioon
                 </Link>
               </li>
             </ul>
@@ -142,7 +85,7 @@ export default function Footer() {
 
         <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gray-200 dark:border-gray-700">
           <div className="text-gray-600 dark:text-gray-400 mb-4 md:mb-0">
-            © {currentYear} RoheAI. All rights reserved.
+            © {currentYear} RoheAI. Kõik õigused kaitstud.
           </div>
 
           <div className="flex space-x-6">

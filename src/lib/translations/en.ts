@@ -29,6 +29,7 @@ export const en = {
   upgrade: "Upgrade",
   sign_up: "Sign up",
   sign_in: "Sign in",
+  select_language: "Select language",
 
   // Auth
   sign_out: "Sign out",
@@ -206,4 +207,32 @@ export const en = {
   disclaimer: "Disclaimer",
   disclaimer_text:
     "Plant identification results are provided as a guide only and may not always be 100% accurate. Always verify with a plant expert before consuming or using any plant for medicinal purposes. RoheAI is not responsible for any actions taken based on identification results.",
+
+  // Plant Identification App
+  upload_plant_photo: "Upload Plant Photo",
+  take_plant_photo: "Take Plant Photo",
+  drag_drop_photo: "Drag & drop your plant photo here",
+  analyzing_plant: "Analyzing your plant...",
+  identification_results: "Identification Results",
+  plant_name: "Plant Name",
+  scientific_name: "Scientific Name",
+  care_instructions: "Care Instructions",
+  watering: "Watering",
+  light: "Light",
+  soil: "Soil",
+  temperature: "Temperature",
+  humidity: "Humidity",
+  fertilizing: "Fertilizing",
+  save_to_collection: "Save to My Collection",
+  try_another: "Try Another Photo",
+  identification_error: "We couldn't identify this plant",
+  try_clearer_photo: "Please try again with a clearer photo",
+  photo_tips: "Photo Tips",
+  use_good_lighting: "Use good lighting",
+  focus_on_leaves: "Focus on leaves and flowers",
+  avoid_shadows: "Avoid shadows",
+  my_plants: "My Plants",
+  no_saved_plants: "No saved plants yet",
+  saved_successfully: "Plant saved to your collection",
+  view_collection: "View My Collection",
 };

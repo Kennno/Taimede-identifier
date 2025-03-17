@@ -8,15 +8,16 @@ export default function AboutSection() {
           <div className="inline-flex items-center justify-center p-2 bg-green-100 dark:bg-green-900/50 rounded-full mb-4">
             <Leaf className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
             <span className="text-green-800 dark:text-green-300 font-medium">
-              About RoheAI
+              RoheAI-st
             </span>
           </div>
           <h2 className="text-3xl font-bold mb-4 dark:text-white">
-            What We Do
+            Millega me tegeleme?
           </h2>
           <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            RoheAI is dedicated to helping plant enthusiasts identify,
-            understand, and care for their plants using advanced AI technology.
+            RoheAI on pühendunud taimeentusiastide abistamisele taimede
+            tuvastamisel, mõistmisel ja hooldamisel, kasutades täiustatud
+            tehisintellekti tehnoloogiat.
           </p>
         </div>
 
@@ -35,11 +36,11 @@ export default function AboutSection() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold mb-2 dark:text-white">
-                  AI-Powered Plant Analysis
+                  Tehisintellektil põhinev analüüs taimest
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Upload a picture and get instant plant identification and
-                  health insights, with accurate results in seconds.
+                  Lae üles pilt ja saa kohene taime tuvastamine ja
+                  terviseülevaade, täpsete tulemustega sekunditega.
                 </p>
               </div>
             </div>
@@ -50,14 +51,15 @@ export default function AboutSection() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold mb-2 dark:text-white">
-                  Personalized Care Schedules{" "}
+                  Personaalsed hooldusgraafikud{" "}
                   <span className="text-xs font-normal text-amber-600 dark:text-amber-400 ml-2">
-                    Coming Soon
+                    TULEB VARSTI
                   </span>
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Get automated reminders via SMS, email, or phone notifications
-                  for watering, fertilizing, and other care tasks.
+                  Saa automaatseid meeldetuletusi SMS-i, e-posti või telefoni
+                  teavituste kaudu kastmise, väetamise ja muude
+                  hooldustoimingute jaoks.
                 </p>
               </div>
             </div>
@@ -68,14 +70,14 @@ export default function AboutSection() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold mb-2 dark:text-white">
-                  Plant Collection Tracking{" "}
+                  Taimekollektsiooni jälgimine{" "}
                   <span className="text-xs font-normal text-amber-600 dark:text-amber-400 ml-2">
-                    Coming Soon
+                    TULEB VARSTI
                   </span>
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  A digital library for managing and logging your plants,
-                  complete with growth tracking and care history.
+                  Digitaalne raamatukogu taimede haldamiseks ja jälgimiseks,
+                  koos kasvu jälgimise ja hooldusajalooga.
                 </p>
               </div>
             </div>
@@ -86,14 +88,15 @@ export default function AboutSection() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold mb-2 dark:text-white">
-                  Educational Resources{" "}
+                  Hariduslikud ressursid{" "}
                   <span className="text-xs font-normal text-amber-600 dark:text-amber-400 ml-2">
-                    Coming Soon
+                    TULEB VARSTI
                   </span>
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Access growing tips, pest management guides, and expert
-                  insights to help your plants thrive year-round.
+                  Juurdepääs kasvatamise nõuannetele, kahjuritõrje juhenditele
+                  ja ekspertide teadmistele, et aidata sinu taimedel õitseda
+                  aastaringselt.
                 </p>
               </div>
             </div>

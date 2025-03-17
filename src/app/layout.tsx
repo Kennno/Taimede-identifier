@@ -3,9 +3,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import ScrollToTop from "@/components/scroll-to-top";
-import CookieConsent from "@/components/cookie-consent";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/language-context";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -82,9 +83,31 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "verification_token",
+    google: process.env.GOOGLE_VERIFICATION_TOKEN || "verification_token",
   },
 };
+
+// Middleware for redirects
+export function middleware() {
+  const headersList = headers();
+  const pathname = headersList.get("x-invoke-path") || "";
+
+  // Define redirects
+  const redirects = {
+    "/mission": "/missioon",
+    "/about": "/meist",
+    "/terms": "/privacy",
+    "/security": "/privacy",
+    "/cookies": "/privacy",
+    "/legal": "/privacy",
+  };
+
+  // Check if current path needs to be redirected
+  const redirectTo = redirects[pathname as keyof typeof redirects];
+  if (redirectTo) {
+    redirect(redirectTo);
+  }
+}
 
 export default function RootLayout({
   children,
@@ -92,17 +115,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="et" suppressHydrationWarning className="dark:bg-gray-950">
+    <html
+      lang="et"
+      suppressHydrationWarning
+      className="dark:bg-gray-950"
+      dir="ltr"
+    >
       <Script src="https://api.tempolabs.ai/proxy-asset?url=https://storage.googleapis.com/tempo-public-assets/error-handling.js" />
       <body
-        className={`${inter.className} bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100 min-h-screen transition-colors duration-200`}
+        className={`${inter.className} bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100 min-h-screen transition-colors duration-200 text-base md:text-base lg:text-base`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <LanguageProvider>
             {children}
             <TempoInit />
             <ScrollToTop />
-            <CookieConsent />
           </LanguageProvider>
         </ThemeProvider>
       </body>

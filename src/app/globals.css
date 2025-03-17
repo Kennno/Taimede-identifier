@@ -68,6 +68,64 @@
   }
 }
 
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  button,
+  .button,
+  [role="button"],
+  a.button,
+  a[role="button"] {
+    @apply min-h-10 min-w-10 px-3 py-2;
+  }
+
+  input,
+  select,
+  textarea {
+    @apply min-h-10 px-3 py-2;
+  }
+
+  .dropdown-content,
+  .popover-content,
+  .menu-content {
+    @apply min-w-48;
+  }
+
+  /* Increase touch targets */
+  .nav-link,
+  .menu-item,
+  .dropdown-item {
+    @apply py-3 px-4;
+  }
+
+  /* Improve readability */
+  p,
+  li,
+  span {
+    @apply text-base leading-relaxed;
+  }
+
+  h1 {
+    @apply text-2xl sm:text-3xl;
+  }
+
+  h2 {
+    @apply text-xl sm:text-2xl;
+  }
+
+  h3 {
+    @apply text-lg sm:text-xl;
+  }
+}
+
+/* Fix for dark mode on mobile */
+.dark .dark\:bg-gray-950 {
+  background-color: rgb(3, 7, 18);
+}
+
+.dark .dark\:text-gray-100 {
+  color: rgb(243, 244, 246);
+}
+
 @keyframes progress {
   0% {
     width: 5%;
@@ -110,4 +168,32 @@
 
 .animate-progress {
   animation: progress 3s ease-in-out infinite;
+}
+
+/* Improve chat UI */
+.chat-message {
+  max-width: 85%;
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  word-break: break-word;
+}
+
+.chat-message-user {
+  background-color: rgb(22, 163, 74);
+  color: white;
+  border-top-right-radius: 0.25rem;
+  margin-left: auto;
+}
+
+.chat-message-assistant {
+  background-color: rgb(243, 244, 246);
+  color: rgb(31, 41, 55);
+  border-top-left-radius: 0.25rem;
+  margin-right: auto;
+}
+
+.dark .chat-message-assistant {
+  background-color: rgb(31, 41, 55);
+  color: rgb(243, 244, 246);
 }
