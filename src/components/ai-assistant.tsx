@@ -178,6 +178,20 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
             });
           },
         )
+        .on(
+          "postgres_changes",
+          {
+            event: "DELETE",
+            schema: "public",
+            table: "chat_conversations",
+            filter: `id=eq.${currentConversationId}`,
+          },
+          () => {
+            // If the conversation was deleted, clear the messages
+            setMessages([]);
+            setCurrentConversationId(null);
+          },
+        )
         .subscribe();
 
       return () => {
@@ -388,19 +402,36 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
       // Call Gemini API for plant care advice
       const userQuery = contextPrompt + input;
 
-      // Use the Gemini API to get a response
-      const response = await identifyPlantWithGemini(
-        base64Image,
-        "et",
-        userQuery,
-      );
+      // Determine if we should analyze the image or just respond to text
+      let response;
+      if (base64Image) {
+        // If there's an image, use it for plant identification
+        response = await identifyPlantWithGemini(
+          base64Image,
+          "et",
+          input ? userQuery : "", // If there's text, include it as context
+        );
+      } else {
+        // Text-only query
+        response = await identifyPlantWithGemini("", "et", userQuery);
+      }
 
       // Create assistant response
       const assistantMessage: Message = {
         role: "assistant",
         content:
           response.response ||
-          "Ma ei ole kindel kuidas sellele vastata. Kas saaksid küsida teistmoodi?",
+          (base64Image && !input
+            ? // If it's an image-only query with no text, format the plant info nicely
+              `**Taim tuvastatud:** ${response.name} (${response.scientificName})\n\n` +
+              `${response.description || ""}\n\n` +
+              `**Kastmine:** ${response.waterNeeds}\n` +
+              `**Valgus:** ${response.lightNeeds}\n` +
+              `**Muld:** ${response.soilType}\n` +
+              `**Kasvuviis:** ${response.growthHabit}\n` +
+              `**Hoolduse tase:** ${response.careLevel}`
+            : // Default fallback
+              "Ma ei ole kindel kuidas sellele vastata. Kas saaksid küsida teistmoodi?"),
       };
 
       // Save assistant message to database if logged in
@@ -472,23 +503,14 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
       const file = e.target.files[0];
       if (file.size > 10 * 1024 * 1024) {
         // 10MB limit
-        toast({
-          title: "Viga",
-          description: "Palun lae üles pilt väiksem kui 10MB!",
-          variant: "destructive",
-        });
+        alert("Palun lae üles pilt väiksem kui 10MB!");
         return;
       }
 
       // Check file type
       const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
       if (!validTypes.includes(file.type)) {
-        toast({
-          title: "Viga",
-          description:
-            "Palun lae üles ainult JPG, PNG, GIF või WEBP formaadis pilt!",
-          variant: "destructive",
-        });
+        alert("Palun lae üles ainult JPG, PNG, GIF või WEBP formaadis pilt!");
         return;
       }
 
@@ -563,7 +585,7 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
       >
         <div className="relative">
           <MessageSquare className="h-7 w-7" />
-          <span className="absolute -top-2 -right-2 bg-white text-green-600 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+          <span className="absolute -top-2 -right-2 bg-white dark:bg-gray-800 text-green-600 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
             AI
           </span>
         </div>
@@ -767,21 +789,7 @@ export default function AIAssistant({ user, isPremium }: AIAssistantProps) {
                   )}
                 </Button>
               </div>
-              <div className="flex justify-between items-center w-full">
-                <label
-                  htmlFor="file-upload"
-                  className="cursor-pointer text-xs text-green-600 hover:text-green-700 flex items-center"
-                >
-                  <Upload className="h-3 w-3 mr-1" /> Lae üles foto
-                  <input
-                    id="file-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    ref={fileInputRef}
-                    onChange={handleImageUpload}
-                  />
-                </label>
+              <div className="flex justify-end items-center w-full">
                 {!user && (
                   <p className="text-xs text-gray-500">
                     Vestlus säilib 24h või kuni brauseri sulgemiseni

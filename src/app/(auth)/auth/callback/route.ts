@@ -33,6 +33,6 @@ export async function GET(request: Request) {
   }
 
   // URL to redirect to after sign in process completes
-  const redirectTo = redirect_to || "/dashboard";
+  const redirectTo = redirect_to || "/";
   return NextResponse.redirect(new URL(redirectTo, requestUrl.origin));
 }

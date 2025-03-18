@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AIAssistant from "@/components/ai-assistant";
 import { SubscriptionButtonHandler } from "../dashboard/client-components";
+import { AccountClient } from "@/components/account-client";
 
 export default async function Toolaud() {
   const supabase = await createClient();
@@ -48,6 +49,7 @@ export default async function Toolaud() {
     <SubscriptionCheck>
       <DashboardNavbar />
       <SubscriptionButtonHandler />
+      <AccountClient />
       <main className="w-full">
         <div className="container mx-auto px-4 py-8 flex flex-col gap-8">
           {/* Header Section */}
@@ -151,17 +153,6 @@ export default async function Toolaud() {
                             </div>
                           </div>
                         </div>
-
-                        <div className="pt-4 border-t">
-                          <h3 className="text-lg font-medium mb-2 text-red-600">
-                            Ohutsoon
-                          </h3>
-                          <p className="text-sm text-gray-500 mb-4">
-                            Püsivad toimingud, mida ei saa tagasi võtta
-                          </p>
-
-                          <Button variant="destructive">Kustuta konto</Button>
-                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -205,29 +196,29 @@ export default async function Toolaud() {
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <CreditCard className="h-5 w-5 text-green-600" />
+                        <CreditCard className="h-5 w-5 text-green-600 dark:text-green-400" />
                         <span>Tellimus</span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="text-center">
-                        <div className="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium mb-4">
+                        <div className="inline-block bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-3 py-1 rounded-full text-sm font-medium mb-4">
                           {subscription ? "Aktiivne" : "Tasuta pakett"}
                         </div>
 
-                        <h3 className="text-2xl font-bold mb-1">
+                        <h3 className="text-2xl font-bold mb-1 dark:text-white">
                           {subscription ? "Premium pakett" : "Tasuta pakett"}
                         </h3>
 
                         {subscription ? (
-                          <p className="text-gray-500 mb-6">
+                          <p className="text-gray-500 dark:text-gray-400 mb-6">
                             Uueneb{" "}
                             {new Date(
                               subscription.current_period_end * 1000,
                             ).toLocaleDateString()}
                           </p>
                         ) : (
-                          <p className="text-gray-500 mb-6">
+                          <p className="text-gray-500 dark:text-gray-400 mb-6">
                             Piiratud funktsioonid saadaval
                           </p>
                         )}
@@ -247,34 +238,41 @@ export default async function Toolaud() {
                 <div className="md:col-span-2">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Maksete ajalugu</CardTitle>
+                      <CardTitle className="dark:text-white">
+                        Maksete ajalugu
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       {subscription ? (
                         <div className="space-y-4">
-                          <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                          <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div>
-                              <p className="font-medium">Premium pakett</p>
-                              <p className="text-sm text-gray-500">
+                              <p className="font-medium dark:text-white">
+                                Premium pakett
+                              </p>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
                                 {new Date(
                                   subscription.current_period_start * 1000,
                                 ).toLocaleDateString()}
                               </p>
                             </div>
-                            <p className="font-medium">
+                            <p className="font-medium dark:text-white">
                               ${subscription.amount / 100}.00
                             </p>
                           </div>
 
                           <div className="text-center mt-8">
-                            <Button variant="outline">
+                            <Button
+                              variant="outline"
+                              className="dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                            >
                               Vaata kõiki tehinguid
                             </Button>
                           </div>
                         </div>
                       ) : (
                         <div className="text-center py-8">
-                          <p className="text-gray-500 mb-4">
+                          <p className="text-gray-500 dark:text-gray-400 mb-4">
                             Maksete ajalugu pole saadaval
                           </p>
                           <Button

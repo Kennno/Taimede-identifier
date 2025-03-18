@@ -88,7 +88,7 @@ export default function Navbar({
         onOpenChange={setAuthModalOpen}
         defaultTab={authModalTab}
       />
-      <nav className="w-full border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 py-4 sticky top-0 z-50 backdrop-blur-sm bg-white/90 dark:bg-gray-900/90">
+      <nav className="w-full border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 py-4 sticky top-0 z-50 backdrop-blur-sm bg-white/90 dark:bg-gray-950/90">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <Link href="/" prefetch>

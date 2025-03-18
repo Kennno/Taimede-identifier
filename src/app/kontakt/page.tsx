@@ -5,6 +5,7 @@ import { Mail, MapPin, Phone, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ContactFormClient } from "@/components/contact-form-client";
 
 export default async function KontaktPage() {
   const supabase = await createClient();
@@ -53,7 +54,11 @@ export default async function KontaktPage() {
               <h2 className="text-2xl font-bold mb-6 dark:text-white">
                 Saada meile sõnum
               </h2>
-              <form className="space-y-6">
+              <form
+                className="space-y-6"
+                id="contact-form"
+                onSubmit={(e) => e.preventDefault()}
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label
@@ -267,6 +272,7 @@ export default async function KontaktPage() {
       </main>
 
       <Footer />
+      <ContactFormClient />
     </div>
   );
 }

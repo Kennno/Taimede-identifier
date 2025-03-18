@@ -148,10 +148,13 @@ export default function UserProfile() {
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setIsResetPasswordOpen(true)}>
-            <Lock className="mr-2 h-4 w-4" />
-            <span>Muuda parooli</span>
-          </DropdownMenuItem>
+          {!user?.app_metadata?.provider ||
+          user?.app_metadata?.provider === "email" ? (
+            <DropdownMenuItem onClick={() => setIsResetPasswordOpen(true)}>
+              <Lock className="mr-2 h-4 w-4" />
+              <span>Muuda parooli</span>
+            </DropdownMenuItem>
+          ) : null}
           <DropdownMenuItem onClick={() => router.push("/toolaud")}>
             <Settings className="mr-2 h-4 w-4" />
             <span>Konto seaded</span>

@@ -28,6 +28,7 @@ export default function CheckoutPopup({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isYearly, setIsYearly] = useState(false);
+  const [isOneTime, setIsOneTime] = useState(false);
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 
   useEffect(() => {
@@ -85,7 +86,11 @@ export default function CheckoutPopup({
           },
           body: JSON.stringify({
             user_id: user.id,
-            price_id: isYearly ? "price_yearly" : "price_monthly",
+            price_id: isOneTime
+              ? "price_1R3lESGHhC3hdJSUsqe2a4Rp"
+              : isYearly
+                ? "price_1R3lB3GHhC3hdJSUBgQYNNqu"
+                : "price_1R3MoIGHhC3hdJSUu4I0zaJ6",
             return_url: window.location.origin + "/success",
           }),
         },
@@ -125,27 +130,44 @@ export default function CheckoutPopup({
             <h3 className="text-lg font-medium mb-2 text-white">
               Premium Plaan
             </h3>
-            <p className="text-gray-400">
-              Ava piiramatu ligipääs taimede tuvastamisele ja premium
-              funktsioonidele
-            </p>
 
             <div className="my-6 flex justify-center">
-              <div className="bg-gray-800 p-1 rounded-full flex items-center gap-2 relative max-w-[200px]">
+              <div className="bg-gray-800 p-1 rounded-full flex items-center gap-2 relative max-w-[300px]">
                 <div
-                  className={`absolute inset-y-1 ${isYearly ? "right-1 left-[calc(50%+4px)]" : "left-1 right-[calc(50%+4px)]"} bg-green-600 rounded-full transition-all duration-300 ease-in-out`}
+                  className={`absolute inset-y-1 ${
+                    isOneTime
+                      ? "right-1 left-[calc(66.6%+4px)]"
+                      : isYearly
+                        ? "left-[calc(33.3%+4px)] right-[calc(33.3%+4px)]"
+                        : "left-1 right-[calc(66.6%+4px)]"
+                  } bg-green-600 rounded-full transition-all duration-300 ease-in-out`}
                 ></div>
                 <button
-                  onClick={() => setIsYearly(false)}
-                  className={`px-3 py-1 rounded-full relative z-10 transition-colors text-sm ${!isYearly ? "text-white font-medium" : "text-gray-400"}`}
+                  onClick={() => {
+                    setIsYearly(false);
+                    setIsOneTime(false);
+                  }}
+                  className={`px-3 py-1 rounded-full relative z-10 transition-colors text-sm ${!isYearly && !isOneTime ? "text-white font-medium" : "text-gray-400"}`}
                 >
                   Igakuiselt
                 </button>
                 <button
-                  onClick={() => setIsYearly(true)}
-                  className={`px-3 py-1 rounded-full relative z-10 transition-colors text-sm ${isYearly ? "text-white font-medium" : "text-gray-400"}`}
+                  onClick={() => {
+                    setIsYearly(true);
+                    setIsOneTime(false);
+                  }}
+                  className={`px-3 py-1 rounded-full relative z-10 transition-colors text-sm ${isYearly && !isOneTime ? "text-white font-medium" : "text-gray-400"}`}
                 >
                   Aastas
+                </button>
+                <button
+                  onClick={() => {
+                    setIsYearly(false);
+                    setIsOneTime(true);
+                  }}
+                  className={`px-3 py-1 rounded-full relative z-10 transition-colors text-sm ${isOneTime ? "text-white font-medium" : "text-gray-400"}`}
+                >
+                  Ühekordne
                 </button>
               </div>
             </div>
@@ -154,7 +176,12 @@ export default function CheckoutPopup({
               <div className="flex justify-between items-center">
                 <span className="font-medium text-white">Premium Tellimus</span>
                 <div className="text-right">
-                  {isYearly ? (
+                  {isOneTime ? (
+                    <div className="font-bold text-green-400">
+                      €63.99
+                      <span className="text-sm font-normal"> ühekordselt</span>
+                    </div>
+                  ) : isYearly ? (
                     <>
                       <div className="font-bold text-green-400">
                         €4.89<span className="text-sm font-normal">/kuus</span>
@@ -184,9 +211,15 @@ export default function CheckoutPopup({
                   <Check className="h-4 w-4 text-green-400" />
                   <span>Reklaamivaba kogemus</span>
                 </div>
+                <div className="flex items-center gap-2 text-sm text-gray-300">
+                  <Check className="h-4 w-4 text-green-400" />
+                  <span>Eksklusiivne juurdepääs uutele funktsioonidele</span>
+                </div>
               </div>
               <div className="text-sm text-gray-400 mt-4 pt-3 border-t border-gray-800">
-                Tühista igal ajal. {isYearly ? "Aastane" : "Igakuine"} tellimus.
+                {isOneTime
+                  ? "Ühekordne makse, eluaegne juurdepääs."
+                  : `Tühista igal ajal. ${isYearly ? "Aastane" : "Igakuine"} tellimus.`}
               </div>
             </div>
           </div>
@@ -208,7 +241,7 @@ export default function CheckoutPopup({
                 Töötleb...
               </>
             ) : (
-              `Jätka ${isYearly ? "aastase" : "igakuise"} maksega`
+              `Jätka ${isOneTime ? "ühekordse" : isYearly ? "aastase" : "igakuise"} maksega`
             )}
           </Button>
         </div>

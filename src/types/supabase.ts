@@ -130,21 +130,66 @@ export type Database = {
           },
         ]
       }
-      device_tracking: {
+      chat_sessions: {
+        Row: {
+          created_at: string | null
+          id: string
+          title: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      device_account_linking: {
         Row: {
           created_at: string | null
           device_id: string
           id: string
-          is_premium: boolean | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
           device_id: string
           id?: string
-          is_premium?: boolean | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
+          device_id?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      device_tracking: {
+        Row: {
+          created_at: string
+          device_id: string
+          id: string
+          is_premium: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          id?: string
+          is_premium?: boolean | null
+        }
+        Update: {
+          created_at?: string
           device_id?: string
           id?: string
           is_premium?: boolean | null
@@ -156,6 +201,7 @@ export type Database = {
           created_at: string | null
           device_id: string
           id: string
+          identification_count: number
           last_used: string | null
           usage_count: number
         }
@@ -163,6 +209,7 @@ export type Database = {
           created_at?: string | null
           device_id: string
           id?: string
+          identification_count?: number
           last_used?: string | null
           usage_count?: number
         }
@@ -170,6 +217,7 @@ export type Database = {
           created_at?: string | null
           device_id?: string
           id?: string
+          identification_count?: number
           last_used?: string | null
           usage_count?: number
         }
@@ -316,6 +364,86 @@ export type Database = {
           name?: string
           scientific_name?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      premium_usage: {
+        Row: {
+          created_at: string | null
+          id: string
+          identification_count: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          identification_count?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          identification_count?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      prices: {
+        Row: {
+          active: boolean | null
+          amount: number
+          currency: string
+          id: string
+          interval: string
+          product_id: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          amount: number
+          currency: string
+          id: string
+          interval: string
+          product_id?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          amount?: number
+          currency?: string
+          id?: string
+          interval?: string
+          product_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prices_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          active: boolean | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          active?: boolean | null
+          description?: string | null
+          id: string
+          name: string
+        }
+        Update: {
+          active?: boolean | null
+          description?: string | null
+          id?: string
+          name?: string
         }
         Relationships: []
       }
@@ -519,6 +647,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_usage: {
+        Row: {
+          created_at: string | null
+          id: string
+          identification_count: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          identification_count?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          identification_count?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           avatar_url: string | null
@@ -609,9 +761,23 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      get_device_usage_count: {
+        Args: {
+          device_id_param: string
+        }
+        Returns: number
+      }
       get_premium_usage: {
         Args: {
-          user_uuid: string
+          user_id: string
+        }
+        Returns: {
+          usage_count: number
+        }[]
+      }
+      increment_device_usage: {
+        Args: {
+          device_id_param: string
         }
         Returns: number
       }
@@ -620,6 +786,12 @@ export type Database = {
           user_uuid: string
         }
         Returns: undefined
+      }
+      increment_user_usage: {
+        Args: {
+          user_uuid: string
+        }
+        Returns: number
       }
     }
     Enums: {

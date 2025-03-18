@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
-import { Trash2, Clock, MessageSquare, X } from "lucide-react";
+import { Trash2, Clock, MessageSquare, X, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import {
@@ -165,6 +165,7 @@ export default function ChatHistory({
     if (!conversationToDelete) return;
 
     try {
+      // Delete messages first
       const { error: messagesError } = await supabase
         .from("chat_messages")
         .delete()
@@ -172,6 +173,7 @@ export default function ChatHistory({
 
       if (messagesError) throw messagesError;
 
+      // Then delete the conversation
       const { error: conversationError } = await supabase
         .from("chat_conversations")
         .delete()
@@ -179,9 +181,15 @@ export default function ChatHistory({
 
       if (conversationError) throw conversationError;
 
+      // Update local state
       setConversations(
         conversations.filter((c) => c.id !== conversationToDelete),
       );
+
+      // If this was the current conversation, clear it
+      if (selectedConversation?.id === conversationToDelete) {
+        setSelectedConversation(null);
+      }
 
       toast({
         title: "Vestlus kustutatud",
@@ -276,6 +284,18 @@ export default function ChatHistory({
             <MessageSquare className="h-10 w-10 mx-auto mb-2 text-gray-600" />
             <p>Vestluste ajalugu puudub</p>
             <p className="text-sm mt-1">Sinu vestlused ilmuvad siia</p>
+            <Button
+              onClick={() => {
+                onClose();
+                setSelectedConversation(null);
+              }}
+              variant="outline"
+              size="sm"
+              className="mt-4 border-green-600 text-green-600 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Alusta uut vestlust
+            </Button>
           </div>
         ) : (
           <div className="space-y-2">

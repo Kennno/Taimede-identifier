@@ -16,6 +16,7 @@ import { Label } from "./ui/label";
 import { createClient } from "../../supabase/client";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { SocialSignIn } from "./social-sign-in";
 
 interface AuthModalProps {
   defaultTab?: "sign-in" | "sign-up";
@@ -200,6 +201,19 @@ export function AuthModal({
                   "Logi sisse"
                 )}
               </Button>
+
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">
+                    või jätka
+                  </span>
+                </div>
+              </div>
+
+              <SocialSignIn language="et" />
             </form>
           </TabsContent>
 
@@ -268,6 +282,19 @@ export function AuthModal({
                   "Loo konto"
                 )}
               </Button>
+
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">
+                    või jätka
+                  </span>
+                </div>
+              </div>
+
+              <SocialSignIn language="et" />
             </form>
           </TabsContent>
         </Tabs>
