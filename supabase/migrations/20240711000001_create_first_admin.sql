@@ -1,1 +1,0 @@
--- This migration is superseded by 20240713000001_remove_all_admin_related_code.sql

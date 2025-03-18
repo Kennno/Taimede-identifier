@@ -54,11 +54,7 @@ export default async function KontaktPage() {
               <h2 className="text-2xl font-bold mb-6 dark:text-white">
                 Saada meile sõnum
               </h2>
-              <form
-                className="space-y-6"
-                id="contact-form"
-                onSubmit={(e) => e.preventDefault()}
-              >
+              <form className="space-y-6" id="contact-form">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label

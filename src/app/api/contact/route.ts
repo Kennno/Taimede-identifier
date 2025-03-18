@@ -13,37 +13,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send email using Resend API
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: "RoheAI <kontakt@roheai.ee>",
-        to: ["ludacrislsrp@gmail.com"],
-        subject: `Kontaktivorm: ${subject}`,
-        html: `
-          <h2>Uus sõnum kontaktivormist</h2>
-          <p><strong>Nimi:</strong> ${name}</p>
-          <p><strong>E-post:</strong> ${email}</p>
-          <p><strong>Teema:</strong> ${subject}</p>
-          <p><strong>Sõnum:</strong></p>
-          <p>${message.replace(/\n/g, "<br>")}</p>
-        `,
-      }),
-    });
+    // Log the contact form submission (instead of sending email)
+    console.log("Contact form submission:", { name, email, subject, message });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Resend API error:", errorData);
-      return NextResponse.json(
-        { error: "E-kirja saatmine ebaõnnestus" },
-        { status: 500 },
-      );
-    }
-
+    // Return success response
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error in contact form submission:", error);
